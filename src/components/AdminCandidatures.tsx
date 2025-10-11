@@ -38,7 +38,7 @@ const AdminCandidatures: React.FC = () => {
   // Récupération des candidatures via l'API
  const fetchCandidats = useCallback(async () => {
   try {
-    const res = await axios.get<Candidat[]>("https://ton-api.com/candidatures", { params: filter });
+    const res = await axios.get<Candidat[]>("http://localhost:5000/api/candidatures", { params: filter });
     setCandidats(res.data);
 
     // Calcul simple des stats
@@ -57,19 +57,19 @@ useEffect(() => {
 }, [fetchCandidats]);
 
   const handleDownload = (id: number) => {
-    window.open(`https://ton-api.com/candidatures/${id}/download`, "_blank");
+    window.open(`http://localhost:5000/api/candidatures${id}/download`, "_blank");
   };
 
   const handleExportExcel = () => {
     axios
-      .get("https://ton-api.com/candidatures/export/excel", { responseType: "blob", params: filter })
+      .get("http://localhost:5000/api/candidatures/export/excel", { responseType: "blob", params: filter })
       .then(res => saveAs(res.data, "candidatures.xlsx"))
       .catch(err => console.error(err));
   };
 
   const handleExportPDF = () => {
     axios
-      .get("https://ton-api.com/candidatures/export/pdf", { responseType: "blob", params: filter })
+      .get("http://localhost:5000/api/candidatures/export/pdf", { responseType: "blob", params: filter })
       .then(res => saveAs(res.data, "candidatures.pdf"))
       .catch(err => console.error(err));
   };

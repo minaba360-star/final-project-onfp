@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -7,28 +8,25 @@ const Login: React.FC = () => {
   const [remember, setRemember] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    const res = await axios.post("http://localhost:5000/api/login", { email, password });
+    const { role, userId } = res.data;
+    localStorage.setItem("role", role);
+    localStorage.setItem("userId", userId);
 
-    // Exemple : vérification simplifiée
-    if (email === "admin@mail.com" && password === "admin123") {
-      localStorage.setItem("role", "admin");
-      navigate("/admin"); // Redirection vers dashboard admin
-    } else if (email === "candidat@mail.com" && password === "1234") {
-      localStorage.setItem("email", email);
-      localStorage.setItem("role", "candidat");
-      navigate("/dashboard-candidat"); // Redirection vers dashboard candidat
-    } else {
-      alert("Email ou mot de passe incorrect !");
-    }
+    if (role === "admin") navigate("/admin");
+    else if (role === "candidat") navigate("/dashboard-candidat");
+  } catch {
+    alert("Email ou mot de passe incorrect !");
+  }
+};
 
-    console.log("Se souvenir de moi :", remember);
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 to-blue-100 p-4 sm:p-6">
       <div className="bg-white shadow-2xl rounded-2xl flex flex-col md:flex-row items-stretch w-full max-w-3xl overflow-hidden transition-all duration-300">
-        
         {/* ---- Formulaire à gauche ---- */}
         <div className="w-full md:w-1/2 p-8 sm:p-10 flex flex-col justify-center">
           <div className="flex items-center justify-center mb-6">
@@ -102,7 +100,7 @@ const Login: React.FC = () => {
         {/* ---- Image à droite ---- */}
         <div className="hidden md:flex w-1/2 relative">
           <img
-            src="/ima.png" // ⚠️ l’image doit être dans /public
+            src="/ima.png"
             alt="Illustration de connexion"
             className="absolute inset-0 w-full h-full object-cover brightness-105 contrast-110"
           />
