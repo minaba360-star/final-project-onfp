@@ -15,6 +15,7 @@ const Login: React.FC = () => {
       localStorage.setItem("role", "admin");
       navigate("/admin"); // Redirection vers dashboard admin
     } else if (email === "candidat@mail.com" && password === "1234") {
+      localStorage.setItem("email", email);
       localStorage.setItem("role", "candidat");
       navigate("/dashboard-candidat"); // Redirection vers dashboard candidat
     } else {
