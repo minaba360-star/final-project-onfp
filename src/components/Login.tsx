@@ -10,13 +10,18 @@ const Login: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (email === "test@mail.com" && password === "1234") {
-      alert("Connexion réussie !");
-      console.log("Se souvenir de moi :", remember);
-      navigate("/");
+    // Exemple : vérification simplifiée
+    if (email === "admin@mail.com" && password === "admin123") {
+      localStorage.setItem("role", "admin");
+      navigate("/admin"); // Redirection vers dashboard admin
+    } else if (email === "candidat@mail.com" && password === "1234") {
+      localStorage.setItem("role", "candidat");
+      navigate("/dashboard-candidat"); // Redirection vers dashboard candidat
     } else {
       alert("Email ou mot de passe incorrect !");
     }
+
+    console.log("Se souvenir de moi :", remember);
   };
 
   return (
