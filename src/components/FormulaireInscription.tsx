@@ -260,7 +260,7 @@ const FormulaireInscription: React.FC = () => {
           </form>
      </div>
       </main>
-      <footer className="bg-orange-500 h-10 mt-10"></footer>
+      <footer className="bg-blue-800 h-10 mt-10"></footer>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import FormulaireInscription from "./components/formulaireInscription";
-import Login from "./components/login";
+import FormulaireInscription from "./components/FormulaireInscription";
+import Login from "./components/Login";
 
 const App: React.FC = () => {
   return (
