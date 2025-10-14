@@ -3,31 +3,25 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import FormulaireInscription from "./components/FormulaireInscription";
 import Login from "./components/Login";
 import DashboardCandidat from "./components/DashboardCandidat";
-import AdminDashboard from "./components/AdminDashboard";
-import ProtectedRoute from "./components/ProtectedRoute";
+import DashboardAdmin from "./components/DashboardAdmin";
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        {/* Page d'inscription */}
         <Route path="/" element={<FormulaireInscription />} />
+
+        {/* Page de connexion */}
         <Route path="/login" element={<Login />} />
-        <Route
-          path="/dashboard-candidat"
-          element={
-            <ProtectedRoute requiredRole="candidat">
-              <DashboardCandidat />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
+
+        {/* Dashboard du candidat */}
+        <Route path="/dashboardcandidat" element={<DashboardCandidat />} />
+
+        {/* Dashboard de l’admin */}
+        <Route path="/admin" element={<DashboardAdmin />} />
+
+        {/* Page 404 */}
         <Route path="*" element={<div>Page non trouvée</div>} />
       </Routes>
     </Router>

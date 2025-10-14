@@ -12,17 +12,21 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
     "@types/axios": "^0.9.36",
+    "@types/xlsx": "^0.0.35",
     "axios": "^1.12.2",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "file-saver": "^2.0.5",
+    "json-server": "^1.0.0-beta.3",
     "multer": "^2.0.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.4",
     "recharts": "^3.2.1",
-    "tailwindcss": "^4.1.14"
+    "sweetalert2": "^11.26.2",
+    "tailwindcss": "^4.1.14",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

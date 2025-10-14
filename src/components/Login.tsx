@@ -1,81 +1,154 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import Swal from "sweetalert2";
+
+interface Candidat {
+  email: string;
+  password: string;
+  prenom?: string;
+  nom?: string;
+}
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  try {
-    const res = await axios.post("http://localhost:5000/api/login", { email, password });
-    const { role, userId } = res.data;
-    localStorage.setItem("role", role);
-    localStorage.setItem("userId", userId);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
 
-    if (role === "admin") navigate("/admin");
-    else if (role === "candidat") navigate("/dashboard-candidat");
-  } catch {
-    alert("Email ou mot de passe incorrect !");
-  }
-};
+    // --- Vérification si c'est un admin ---
+    const adminEmails = ["minaba360@gmail.com", "alinemangane8@gmail.com"];
+    const adminPassword = "admin123";
 
+    if (adminEmails.includes(email) && password === adminPassword) {
+      const adminUser = { email, role: "admin" };
+      localStorage.setItem("user", JSON.stringify(adminUser));
+
+      Swal.fire({
+        icon: "success",
+        title: "👑 Bienvenue Administrateur !",
+        showConfirmButton: false,
+        timer: 1800,
+      });
+
+      navigate("/admin");
+      return;
+    }
+
+    try {
+      // --- Requête vers ton serveur local ---
+      const response = await fetch("http://localhost:3000/candidats");
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des candidats.");
+      }
+
+      const candidats: Candidat[] = await response.json();
+
+      // 🔹 Recherche du candidat correspondant
+      const candidat =
+        candidats.find(
+          (c) => c.email === email && c.password === password
+        ) || null;
+
+      if (candidat) {
+        const userData = {
+          email: candidat.email,
+          role: "candidat",
+          prenom: candidat.prenom,
+          nom: candidat.nom,
+        };
+
+        localStorage.setItem("user", JSON.stringify(userData));
+
+        Swal.fire({
+          icon: "success",
+          title: `✅ Bienvenue ${candidat.prenom ?? ""} ${candidat.nom ?? ""} !`,
+          showConfirmButton: false,
+          timer: 2000,
+        });
+
+        navigate("/dashboardcandidat");
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "❌ Email ou mot de passe incorrect !",
+          showConfirmButton: false,
+          timer: 2000,
+        });
+        setError("Email ou mot de passe incorrect !");
+      }
+    } catch (err: unknown) {
+      console.error("Erreur de connexion :", err);
+      Swal.fire({
+        icon: "warning",
+        title: "⚠️ Impossible de se connecter au serveur local.",
+        text: "Vérifie que ton serveur JSON est bien lancé sur le port 3000.",
+      });
+      setError("Impossible de se connecter au serveur local.");
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 to-blue-100 p-4 sm:p-6">
-      <div className="bg-white shadow-2xl rounded-2xl flex flex-col md:flex-row items-stretch w-full max-w-3xl overflow-hidden transition-all duration-300">
-        {/* ---- Formulaire à gauche ---- */}
-        <div className="w-full md:w-1/2 p-8 sm:p-10 flex flex-col justify-center">
-          <div className="flex items-center justify-center mb-6">
-            <img
-              src="/logo.png"
-              alt="Logo"
-              className="h-20 w-20 rounded-full shadow-md object-cover"
-            />
-          </div>
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* --- HEADER --- */}
+      <header className="bg-blue-800 text-white">
+        <div className="container mx-auto flex items-center justify-between px-4 py-3">
+          <a href="/" className="flex items-center space-x-2">
+            <img src="logo.png" alt="logo." className="h-10 w-10 rounded-full" />
+            <span className="font-bold text-lg">Geustuma</span>
+          </a>
+        </div>
+      </header>
 
-          <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
+      {/* --- FORMULAIRE --- */}
+      <main className="flex-grow flex items-center justify-center py-10">
+        <div className="bg-white shadow-lg rounded-2xl w-full max-w-md p-8">
+          <h2 className="text-2xl font-semibold text-center mb-6 text-gray-700">
             Connexion
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-100 text-red-700 p-2 rounded mb-4 text-center">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium">
                 Email
               </label>
               <input
                 id="email"
                 type="email"
-                className="w-full border border-gray-300 rounded-lg p-3 mt-1 focus:ring-2 focus:ring-blue-400 outline-none"
-                required
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="exemple@mail.com"
+                className="w-full border rounded-lg p-2 mt-1"
+                required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium">
                 Mot de passe
               </label>
               <input
                 id="password"
                 type="password"
-                className="w-full border border-gray-300 rounded-lg p-3 mt-1 focus:ring-2 focus:ring-blue-400 outline-none"
-                required
+                value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full border rounded-lg p-2 mt-1"
+                required
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <input
-                id="remember"
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-400"
-              />
+            <div className="flex items-center">
+              <input type="checkbox" id="remember" className="mr-2" />
               <label htmlFor="remember" className="text-sm text-gray-600">
                 Se souvenir de moi
               </label>
@@ -83,29 +156,22 @@ const Login: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-orange-600 transition font-semibold shadow-md"
+              className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-orange-500 transition"
             >
               Se connecter
             </button>
 
-            <p className="text-center text-sm text-gray-500">
+            <p className="text-center text-sm text-gray-500 mt-3">
               Pas encore de compte ?{" "}
               <Link to="/" className="text-blue-600 hover:underline">
-                S’inscrire
+                S'inscrire
               </Link>
             </p>
           </form>
         </div>
+      </main>
 
-        {/* ---- Image à droite ---- */}
-        <div className="hidden md:flex w-1/2 relative">
-          <img
-            src="/ima.png"
-            alt="Illustration de connexion"
-            className="absolute inset-0 w-full h-full object-cover brightness-105 contrast-110"
-          />
-        </div>
-      </div>
+      <footer className="bg-blue-800 h-10 mt-10"></footer>
     </div>
   );
 };

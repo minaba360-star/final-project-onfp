@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import Swal from "sweetalert2"; // ✅ Import SweetAlert2
 
 const FormulaireInscription: React.FC = () => {
   const navigate = useNavigate();
@@ -23,7 +23,17 @@ const FormulaireInscription: React.FC = () => {
     lettre: null as File | null,
   });
 
-  // 🔹 Gestion des changements
+  // 🔹 Convertir un fichier en base64 pour l'envoi dans la base locale
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // 🔹 Gestion des champs du formulaire
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, files } = e.target;
     setFormData((prev) => ({
@@ -37,35 +47,76 @@ const FormulaireInscription: React.FC = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Les mots de passe ne correspondent pas !");
+      // ⚠️ Remplace alert() par SweetAlert2
+      Swal.fire({
+        icon: "warning",
+        title: "Les mots de passe ne correspondent pas !",
+        confirmButtonColor: "#1e3a8a",
+      });
       return;
     }
 
     try {
-      const data = new FormData();
-      data.append("prenom", formData.prenom);
-      data.append("nom", formData.nom);
-      data.append("email", formData.email);
-      data.append("password", formData.password);
-      data.append("specialite", formData.specialite);
-      data.append("niveau", formData.niveau);
-      data.append("experience", formData.experience);
-      data.append("statut", "en_attente");
+      // --- Conversion des fichiers en base64
+      const cv64 = formData.cv ? await fileToBase64(formData.cv) : null;
+      const diplome64 = formData.diplome ? await fileToBase64(formData.diplome) : null;
+      const lettre64 = formData.lettre ? await fileToBase64(formData.lettre) : null;
 
-      // fichiers joints
-      if (formData.cv) data.append("cv", formData.cv);
-      if (formData.diplome) data.append("diplome", formData.diplome);
-      if (formData.lettre) data.append("lettre", formData.lettre);
+      // --- Création du nouvel objet candidat
+      const newCandidat = {
+        id: Date.now(),
+        prenom: formData.prenom,
+        nom: formData.nom,
+        dateNaissance: formData.dateNaissance,
+        lieuNaissance: formData.lieuNaissance,
+        email: formData.email,
+        cin: formData.cin,
+        tel: formData.tel,
+        adresse: formData.adresse,
+        password: formData.password,
+        niveau: formData.niveau,
+        specialite: formData.specialite,
+        experience: formData.experience,
+        statut: "en_attente",
+        fichiers: {
+          cv: cv64,
+          diplome: diplome64,
+          lettre: lettre64,
+        },
+      };
 
-      await axios.post("http://localhost:5000/api/candidatures", data, {
-        headers: { "Content-Type": "multipart/form-data" },
+      // --- Enregistrement dans la base locale JSON Server ---
+      const response = await fetch("http://localhost:3000/candidats", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newCandidat),
       });
 
-      alert("Candidature enregistrée avec succès !");
-      navigate("/login");
+      if (!response.ok) {
+        throw new Error("Erreur lors de l’enregistrement sur le serveur.");
+      }
+
+      // ✅ Succès avec SweetAlert2
+      Swal.fire({
+        icon: "success",
+        title: "Candidature enregistrée avec succès !",
+        showConfirmButton: false,
+        timer: 1800,
+      });
+
+      setTimeout(() => navigate("/login"), 1800);
+
     } catch (error) {
-      console.error("Erreur lors de l’envoi :", error);
-      alert("Une erreur est survenue. Vérifie ton serveur !");
+      console.error("Erreur lors de l’enregistrement :", error);
+
+      // ❌ Erreur avec SweetAlert2
+      Swal.fire({
+        icon: "error",
+        title: "Une erreur est survenue pendant l’inscription.",
+        confirmButtonColor: "#b91c1c",
+      });
     }
   };
 
@@ -75,10 +126,9 @@ const FormulaireInscription: React.FC = () => {
       <header className="bg-blue-800 text-white">
         <div className="container mx-auto flex items-center justify-between px-4 py-3">
           <a href="/" className="flex items-center space-x-2">
-            <img src="logo.png" alt="logo." className="h-10 w-10 rounded-full" />
+            <img src="logo.png" alt="logo" className="h-10 w-10 rounded-full" />
             <span className="font-bold text-lg">Geustuma</span>
           </a>
-
           <nav className="space-x-4">
             <Link to="/login">
               <button className="border border-blue-500 hover:bg-orange-400 text-white font-bold py-2 px-4 rounded">
@@ -97,129 +147,9 @@ const FormulaireInscription: React.FC = () => {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
-            {/* Prénom / Nom */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="prenom" className="block text-sm font-medium">Prénom</label>
-                <input id="prenom" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-              <div>
-                <label htmlFor="nom" className="block text-sm font-medium">Nom</label>
-                <input id="nom" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-            </div>
-
-            {/* Date / Lieu de naissance */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="dateNaissance" className="block text-sm font-medium">Date de naissance</label>
-                <input id="dateNaissance" type="date" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-              <div>
-                <label htmlFor="lieuNaissance" className="block text-sm font-medium">Lieu de naissance</label>
-                <input id="lieuNaissance" type="text" placeholder="Ville" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-            </div>
-
-            {/* Email / CIN */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium">Email</label>
-                <input id="email" type="email" placeholder="exemple@mail.com" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-              <div>
-                <label htmlFor="cin" className="block text-sm font-medium">CIN</label>
-                <input id="cin" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-            </div>
-
-            {/* Téléphone / Adresse */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="tel" className="block text-sm font-medium">Téléphone</label>
-                <input id="tel" type="tel" placeholder="77 000 00 00" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-              <div>
-                <label htmlFor="adresse" className="block text-sm font-medium">Adresse</label>
-                <input id="adresse" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-            </div>
-
-            {/* Mot de passe / Confirmation */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium">Mot de passe</label>
-                <input id="password" type="password" placeholder="••••••••" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium">Confirmer le mot de passe</label>
-                <input id="confirmPassword" type="password" placeholder="••••••••" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-            </div>
-
-            {/* Niveau / Spécialité */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="niveau" className="block text-sm font-medium">Niveau d’étude</label>
-                <input id="niveau" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-              <div>
-                <label htmlFor="specialite" className="block text-sm font-medium">Spécialité choisie</label>
-                <input id="specialite" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-              </div>
-            </div>
-
-            {/* Expérience */}
-            <div>
-              <label htmlFor="experience" className="block text-sm font-medium">Années d’expérience</label>
-              <input id="experience" type="number" placeholder="Nombre d'années" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-            </div>
-
-            {/* Fichiers : CV / Diplôme / Lettre */}
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  <div>
-    <label className="block text-sm font-medium mb-1">CV</label>
-    <div className="relative">
-      <input id="cv" type="file" accept=".pdf,.doc,.docx" className="hidden" required onChange={handleChange} />
-      <label htmlFor="cv" className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-orange-500 transition">
-        📎 Joindre CV
-      </label>
-    </div>
-  </div>
-
-  <div>
-    <label className="block text-sm font-medium mb-1">Diplôme</label>
-    <div className="relative">
-      <input id="diplome" type="file" accept=".pdf,.jpg,.png" className="hidden" required onChange={handleChange} />
-      <label htmlFor="diplome" className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-orange-500 transition">
-        🎓 Joindre Diplôme
-      </label>
-    </div>
-  </div>
-
-  <div>
-    <label className="block text-sm font-medium mb-1">Lettre de motivation</label>
-    <div className="relative">
-      <input id="lettre" type="file" accept=".pdf,.doc,.docx" className="hidden" required onChange={handleChange} />
-      <label htmlFor="lettre" className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-orange-500 transition">
-        ✉️ Joindre Lettre
-      </label>
-    </div>
-  </div>
-</div>
-
-
-            {/* Bouton */}
-            <button type="submit" className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-orange-500 transition">
-              S'inscrire
-            </button>
-
-            <p className="text-center text-sm text-gray-500 mt-2">
-              Déjà un compte ?{" "}
-              <Link to="/login" className="text-blue-600 hover:underline">
-                Se connecter
-              </Link>
-            </p>
+            {/* tout ton formulaire reste inchangé */}
+             {/* Prénom / Nom */} <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <label htmlFor="prenom" className="block text-sm font-medium">Prénom</label> <input id="prenom" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> <div> <label htmlFor="nom" className="block text-sm font-medium">Nom</label> <input id="nom" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> </div> {/* Date / Lieu de naissance */} <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <label htmlFor="dateNaissance" className="block text-sm font-medium">Date de naissance</label> <input id="dateNaissance" type="date" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> <div> <label htmlFor="lieuNaissance" className="block text-sm font-medium">Lieu de naissance</label> <input id="lieuNaissance" type="text" placeholder="Ville" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> </div> {/* Email / CIN */} <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <label htmlFor="email" className="block text-sm font-medium">Email</label> <input id="email" type="email" placeholder="exemple@mail.com" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> <div> <label htmlFor="cin" className="block text-sm font-medium">CIN</label> <input id="cin" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> </div> {/* Téléphone / Adresse */} <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <label htmlFor="tel" className="block text-sm font-medium">Téléphone</label> <input id="tel" type="tel" placeholder="77 000 00 00" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> <div> <label htmlFor="adresse" className="block text-sm font-medium">Adresse</label> <input id="adresse" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> </div> {/* Mot de passe / Confirmation */} <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <label htmlFor="password" className="block text-sm font-medium">Mot de passe</label> <input id="password" type="password" placeholder="••••••••" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> <div> <label htmlFor="confirmPassword" className="block text-sm font-medium">Confirmer le mot de passe</label> <input id="confirmPassword" type="password" placeholder="••••••••" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> </div> {/* Niveau / Spécialité */} <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <label htmlFor="niveau" className="block text-sm font-medium">Niveau d’étude</label> <input id="niveau" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> <div> <label htmlFor="specialite" className="block text-sm font-medium">Spécialité choisie</label> <input id="specialite" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> </div> {/* Expérience */} <div> <label htmlFor="experience" className="block text-sm font-medium">Années d’expérience</label> <input id="experience" type="number" placeholder="Nombre d'années" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> </div> {/* Fichiers */} <div className="grid grid-cols-1 md:grid-cols-3 gap-4"> <div> <label className="block text-sm font-medium mb-1">CV</label> <input id="cv" type="file" accept=".pdf,.doc,.docx" className="hidden" required onChange={handleChange} /> <label htmlFor="cv" className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-orange-500 transition"> 📎 Joindre CV </label> </div> <div> <label className="block text-sm font-medium mb-1">Diplôme</label> <input id="diplome" type="file" accept=".pdf,.jpg,.png" className="hidden" required onChange={handleChange} /> <label htmlFor="diplome" className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-orange-500 transition"> 🎓 Joindre Diplôme </label> </div> <div> <label className="block text-sm font-medium mb-1">Lettre de motivation</label> <input id="lettre" type="file" accept=".pdf,.doc,.docx" className="hidden" required onChange={handleChange} /> <label htmlFor="lettre" className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-orange-500 transition"> ✉️ Joindre Lettre </label> </div> </div> {/* Bouton */} <button type="submit" className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-orange-500 transition"> S'inscrire </button> <p className="text-center text-sm text-gray-500 mt-2"> Déjà un compte ?{" "} <Link to="/login" className="text-blue-600 hover:underline"> Se connecter </Link> </p>
+              {/* ... */}
           </form>
         </div>
       </main>
