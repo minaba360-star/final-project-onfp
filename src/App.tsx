@@ -9,11 +9,13 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        
+        {/* Page de connexion */}
+        <Route path="/login" element={<Login />} />
+        
         {/* Page d'inscription */}
         <Route path="/" element={<FormulaireInscription />} />
 
-        {/* Page de connexion */}
-        <Route path="/login" element={<Login />} />
 
         {/* Dashboard du candidat */}
         <Route path="/dashboardcandidat" element={<DashboardCandidat />} />

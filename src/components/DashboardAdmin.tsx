@@ -37,8 +37,9 @@ const DashboardAdmin: React.FC = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(8);
+  const [pageSize] = useState(8);
   const [offersCount, setOffersCount] = useState<number | null>(null);
+  const [filtre, setFiltre] = useState("tous");
 
   // Charger les données
   const fetchCandidats = async () => {
@@ -47,12 +48,15 @@ const DashboardAdmin: React.FC = () => {
       const res = await fetch(API_URL);
       const data: Candidat[] = await res.json();
       setCandidats(data);
+
       const uniqueSpecs = Array.from(new Set(data.map((c) => c.specialite))).sort();
       setSpecialites(uniqueSpecs);
+
       const parSpec: Record<string, number> = {};
       data.forEach((c) => {
         parSpec[c.specialite] = (parSpec[c.specialite] || 0) + 1;
       });
+
       setStats({ total: data.length, parSpecialite: parSpec });
     } catch (err) {
       console.error("Erreur fetch candidats:", err);
@@ -101,17 +105,29 @@ const DashboardAdmin: React.FC = () => {
     saveAs(new Blob([excelBuffer]), "candidats.xlsx");
   };
 
-  const handleExportCurrentPageExcel = () => {
-    const start = (currentPage - 1) * pageSize;
-    const pageItems = filteredCandidats.slice(start, start + pageSize);
-    const worksheet = XLSX.utils.json_to_sheet(pageItems);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Page");
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([excelBuffer]), `candidats_page_${currentPage}.xlsx`);
-  };
+  const filteredCandidats = candidats.filter((c) => {
+    const matchesSpec = selectedSpecialite ? c.specialite === selectedSpecialite : true;
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return matchesSpec;
+    const combined = `${c.nom} ${c.prenom} ${c.email} ${c.specialite} ${c.niveau}`.toLowerCase();
+    return matchesSpec && combined.includes(term);
+  });
+
+  // Gestion pagination
+  const totalItems = filteredCandidats.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const pageCandidats = filteredCandidats.slice(startIndex, startIndex + pageSize);
+
+  // Statistiques
+  const totalCandidats = candidats.length;
+  const totalAcceptes = candidats.filter((c) => c.statut === "accepté").length;
+  const totalRejetes = candidats.filter((c) => c.statut === "rejeté").length;
+
+  // Application du filtre sur la table
 
   const handleDownloadPDF = (cand: Candidat) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const links = Object.entries(cand.fichiers || {}).filter(([_, url]) => !!url);
     if (links.length === 0) {
       alert("Aucun document disponible pour ce candidat.");
@@ -127,216 +143,275 @@ const DashboardAdmin: React.FC = () => {
     });
   };
 
-  const filteredCandidats = candidats.filter((c) => {
-    const matchesSpec = selectedSpecialite ? c.specialite === selectedSpecialite : true;
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) return matchesSpec;
-    const combined = `${c.nom} ${c.prenom} ${c.email} ${c.specialite} ${c.niveau}`.toLowerCase();
-    return matchesSpec && combined.includes(term);
-  });
-
-  const totalItems = filteredCandidats.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  const startIndex = (currentPage - 1) * pageSize;
-  const pageCandidats = filteredCandidats.slice(startIndex, startIndex + pageSize);
-
-  const totalCandidats = candidats.length;
-  const totalAcceptes = candidats.filter((c) => c.statut === "accepte").length;
-  const totalRejetes = candidats.filter((c) => c.statut === "refuse").length;
+  const handleExportCurrentPageExcel = () => {
+    const start = (currentPage - 1) * pageSize;
+    const pageItems = filteredCandidats.slice(start, start + pageSize);
+    const worksheet = XLSX.utils.json_to_sheet(pageItems);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Page");
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    saveAs(new Blob([excelBuffer]), `candidats_page_${currentPage}.xlsx`);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 via-blue-50 to-sky-200 p-8">
-      <h1 className="text-4xl font-bold mb-8 text-center bg-gradient-to-r from-blue-600 to-sky-500 bg-clip-text text-transparent drop-shadow-lg">
+    <div className="min-h-screen bg-gradient-to-b p-8">
+      <h1 className="text-4xl font-bold mb-8 text-center bg-gradient-to-r from-blue-800 to-blue-800 bg-clip-text text-transparent drop-shadow-md">
         🧭 Tableau de bord Administrateur
       </h1>
 
       {/* Cartes statistiques */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 max-w-6xl mx-auto">
-        <div className="bg-gradient-to-r from-sky-400 to-blue-500 text-white rounded-2xl shadow-lg p-5 flex items-center gap-4 hover:scale-105 transition-transform duration-300">
-          <div className="p-3 rounded-full bg-white/30">
+        {/* Carte 1 */}
+        <div className="bg-white text-blue-700 rounded-2xl shadow-md p-5 flex items-center gap-4 border-t-4 border-blue-400 hover:shadow-lg transition-transform hover:-translate-y-1">
+          <div className="p-3 rounded-full bg-blue-100">
             <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V5a4 4 0 00-8 0v6M5 20h14a2 2 0 002-2v-5a2 2 0 00-2-2H5a2 2 0 00-2 2v5a2 2 0 002 2z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 11V5a4 4 0 00-8 0v6M5 20h14a2 2 0 002-2v-5a2 2 0 00-2-2H5a2 2 0 00-2 2v5a2 2 0 002 2z"
+              />
             </svg>
           </div>
           <div>
-            <div className="text-sm uppercase tracking-wider">Inscrits</div>
+            <div className="text-sm uppercase tracking-wider text-gray-500">Inscrits</div>
             <div className="text-3xl font-semibold">{stats.total}</div>
-            <div className="text-xs opacity-80">Total des candidats</div>
+            <div className="text-xs text-gray-400">Total des candidats</div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-orange-300 to-cyan-500 text-white rounded-2xl shadow-lg p-5 flex items-center gap-4 hover:scale-105 transition-transform duration-300">
-          <div className="p-3 rounded-full bg-white/30">
+        {/* Carte 2 */}
+        <div className="bg-white text-blue-700 rounded-2xl shadow-md p-5 flex items-center gap-4 border-t-4 border-blue-400 hover:shadow-lg transition-transform hover:-translate-y-1">
+          <div className="p-3 rounded-full bg-blue-100">
             <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a4 4 0 118 0v6m-5 3h2" />
             </svg>
           </div>
           <div>
-            <div className="text-sm uppercase tracking-wider">Offres</div>
+            <div className="text-sm uppercase tracking-wider text-gray-500">Offres</div>
             <div className="text-3xl font-semibold">{offersCount ?? "—"}</div>
-            <div className="text-xs opacity-80">Récupérées depuis /offres</div>
+            <div className="text-xs text-gray-400">Récupérées depuis /offres</div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-blue-400 to-sky-600 text-white rounded-2xl shadow-lg p-5 flex items-center gap-4 hover:scale-105 transition-transform duration-300">
-          <div className="p-3 rounded-full bg-white/30">
+        {/* Carte 3 – Candidatures */}
+        <div className="bg-white text-blue-700 rounded-2xl shadow-md p-5 flex items-center gap-4 border-t-4 border-blue-500 hover:shadow-lg transition-transform hover:-translate-y-1">
+          <div className="p-3 rounded-full bg-blue-100">
             <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17a4 4 0 01-4-4V7a4 4 0 118 0v6a4 4 0 01-4 4z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 17a4 4 0 01-4-4V7a4 4 0 118 0v6a4 4 0 01-4 4z"
+              />
             </svg>
           </div>
           <div>
-            <div className="text-sm uppercase tracking-wider">Candidatures</div>
+            <div className="text-sm uppercase tracking-wider text-gray-500">Candidatures</div>
             <div className="text-3xl font-semibold">{totalCandidats}</div>
             <div className="text-sm mt-1">
-              <span className="text-green-200 font-medium">✅ {totalAcceptes} acceptées</span> •{" "}
-              <span className="text-red-200 font-medium">❌ {totalRejetes} rejetées</span>
+              <span className="text-green-400 font-medium">✅ {totalAcceptes} acceptées</span> •{" "}
+              <span className="text-red-600 font-medium">❌ {totalRejetes} rejetées</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filtres et actions */}
-      <div className="flex flex-wrap justify-between items-center gap-4 mb-8 bg-white/70 backdrop-blur-lg p-4 rounded-2xl shadow max-w-6xl mx-auto">
-        <div className="flex gap-3 flex-wrap">
-          <button onClick={fetchCandidats} className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg shadow">
-            🔄 Rafraîchir
-          </button>
-          <button onClick={handleExportExcel} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow">
-            📊 Exporter tout
-          </button>
-          <button onClick={handleExportCurrentPageExcel} className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg shadow">
-            📄 Exporter page
-          </button>
-        </div>
-        <div className="flex gap-3 flex-wrap items-center">
-          <input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Rechercher..."
-            className="border p-2 rounded-lg w-60 focus:ring-2 focus:ring-sky-400 outline-none"
-          />
-          <select
-            value={selectedSpecialite}
-            onChange={(e) => setSelectedSpecialite(e.target.value)}
-            className="border p-2 rounded-lg"
-          >
-            <option value="">Toutes les spécialités</option>
-            {specialites.map((spec) => (
-              <option key={spec} value={spec}>
-                {spec}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Filtres Acceptés / Rejetés */}
+      <div className="flex gap-3 mb-6 justify-center">
+        <button
+          onClick={() => setFiltre("accepte")}
+          className={`px-4 py-2 rounded-lg border font-medium transition ${
+            filtre === "accepté"
+              ? "bg-blue-500 text-white"
+              : "border-blue-500 text-green-600 hover:bg-green-100"
+          }`}
+        >
+          Voir acceptés
+        </button>
+        <button
+          onClick={() => setFiltre("rejeté")}
+          className={`px-4 py-2 rounded-lg border font-medium transition ${
+            filtre === "refuse"
+              ? "bg-blue-600 text-white"
+              : "border-blue-600 text-red-700 hover:bg-red-100"
+          }`}
+        >
+          Voir rejetés
+        </button>
+        <button
+          onClick={() => setFiltre("tous")}
+          className={`px-4 py-2 rounded-lg border font-medium transition ${
+            filtre === "tous"
+              ? "bg-blue-500 text-black"
+              : "border-blue-500 text-blue-900 hover:bg-orange-100"
+          }`}
+        >
+          Tous
+        </button>
       </div>
 
-      {/* Tableau */}
-      <div className="overflow-x-auto bg-white/90 rounded-2xl shadow-xl backdrop-blur-sm max-w-6xl mx-auto border border-blue-100">
+{/* Filtres et actions */}
+  <div className="flex flex-wrap justify-between items-center gap-4 mb-8 bg-white p-4 rounded-2xl shadow-sm max-w-6xl mx-auto border border-blue-800">
+    <div className="flex gap-3 flex-wrap">
+      <button onClick={fetchCandidats} className="bg-white hover:bg-blue-300 text-black border-blue-800 px-4 py-2 rounded-lg shadow-sm">
+        🔄 Rafraîchir
+      </button>
+      <button onClick={handleExportExcel} className="bg-white hover:bg-blue-300 text-black border-blue-800 px-4 py-2 rounded-lg shadow-sm">
+        📊 Exporter tout
+      </button>
+      <button onClick={handleExportCurrentPageExcel} className="bg-white hover:bg-blue-300 text-black border-blue-800 px-4 py-2 rounded-lg shadow-sm">
+        📄 Exporter page
+      </button>
+    </div>
+    <div className="flex gap-3 flex-wrap items-center">
+      <input
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Rechercher..."
+        className="border border-blue-800 p-2 rounded-lg w-60 focus:ring-2 focus:ring-blue-300 outline-none"
+      />
+      <select
+        value={selectedSpecialite}
+        onChange={(e) => setSelectedSpecialite(e.target.value)}
+        className="border border-blue-800 p-2 rounded-lg bg-white"
+      >
+        <option value="">Toutes les spécialités</option>
+        {specialites.map((spec) => (
+          <option key={spec} value={spec}>
+            {spec}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+
+
+      {/* Tableau principal */}
+      <div className="overflow-x-auto bg-white/90 rounded-2xl shadow-md backdrop-blur-sm max-w-6xl mx-auto border border-orange-800">
         <table className="w-full">
-          <thead className="bg-gradient-to-r from-blue-100 to-sky-100 text-blue-800">
+          <thead className="bg-blue-900 text-white text-sm uppercase tracking-wider border-b border-blue-650">
             <tr>
               {["Nom", "Prénom", "Email", "Spécialité", "Niveau", "Statut", "Documents", "Action"].map((h) => (
-                <th key={h} className="p-3 text-left font-semibold border-b border-blue-200">{h}</th>
+                <th key={h} className="p-3 text-left font-semibold border-b border-blue-300">
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} className="text-center p-6 text-gray-400">Chargement...</td></tr>
+              <tr>
+                <td colSpan={8} className="text-center p-6 text-gray-400">
+                  Chargement...
+                </td>
+              </tr>
             ) : pageCandidats.length === 0 ? (
-              <tr><td colSpan={8} className="text-center p-6 text-gray-400">Aucun candidat trouvé.</td></tr>
+              <tr>
+                <td colSpan={8} className="text-center p-6 text-gray-400">
+                  Aucun candidat trouvé.
+                </td>
+              </tr>
             ) : (
-              pageCandidats.map((c) => (
-                <tr key={c.id} className="hover:bg-sky-50 transition">
-                  <td className="p-3 border-b">{c.nom}</td>
-                  <td className="p-3 border-b">{c.prenom}</td>
-                  <td className="p-3 border-b">{c.email}</td>
-                  <td className="p-3 border-b">{c.specialite}</td>
-                  <td className="p-3 border-b">{c.niveau}</td>
-                  <td className="p-3 text-center border-b">
-                    <span className={`px-3 py-1 rounded-full text-white text-sm ${
-                      c.statut === "accepte"
-                        ? "bg-green-500"
-                        : c.statut === "refuse"
-                        ? "bg-red-500"
-                        : "bg-yellow-400 text-gray-900"
-                    }`}>
-                      {c.statut || "En attente"}
-                    </span>
-                  </td>
-                  <td className="p-3 text-center border-b">
-                    <button
-                      onClick={() => handleDownloadPDF(c)}
-                      className="bg-sky-500 text-white px-3 py-1 rounded-lg hover:bg-sky-600 transition"
-                    >
-                      📁 Voir fichiers
-                    </button>
-                  </td>
-                  <td className="p-3 text-center border-b">
-                    <div className="flex justify-center gap-2">
-                      <button
-                        onClick={() => handleChangeStatut(c.id, "accepte")}
-                        className="bg-green-500 text-white px-2 py-1 rounded-full hover:bg-green-600"
+              pageCandidats
+                .filter((c) => {
+                  if (filtre === "accepte") return c.statut === "accepte";
+                  if (filtre === "refuse") return c.statut === "refuse";
+                  return true;
+                })
+                .map((c) => (
+                  <tr key={c.id} className="hover:bg-orange-50 transition">
+                    <td className="p-3 border-b">{c.nom}</td>
+                    <td className="p-3 border-b">{c.prenom}</td>
+                    <td className="p-3 border-b">{c.email}</td>
+                    <td className="p-3 border-b">{c.specialite}</td>
+                    <td className="p-3 border-b">{c.niveau}</td>
+                    <td className="p-3 text-center border-b">
+                     <span
+                        className={`px-3 py-1 rounded-full text-white text-sm ${
+                          c.statut === "accepte"
+                            ? "bg-green-500"
+                            : c.statut === "refuse"
+                            ? "bg-red-500"
+                            : "bg-amber-400 text-gray-900"
+                        }`}
                       >
-                        ✅
-                      </button>
+                        {c.statut || "En attente"}
+                      </span>
+                    </td>
+                    <td className="p-3 text-center border-b">
                       <button
-                        onClick={() => handleChangeStatut(c.id, "refuse")}
-                        className="bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600"
+                        onClick={() => handleDownloadPDF(c)}
+                        className="bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-orange-300 transition"
                       >
-                        ❌
+                        📁 Voir fichiers
                       </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                    </td>
+                    <td className="p-3 text-center border-b">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => handleChangeStatut(c.id, "accepte")}
+                          className="bg-green-500 text-white px-2 py-1 rounded-full hover:bg-green-600"
+                        >
+                          ✅
+                        </button>
+                        <button
+                          onClick={() => handleChangeStatut(c.id, "refuse")}
+                          className="bg-gray-400 text-white px-2 py-1 rounded-full hover:bg-gray-300"
+                        >
+                          ❌
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
             )}
           </tbody>
         </table>
       </div>
-
-      {/* Pagination */}
-      <div className="flex justify-between items-center max-w-6xl mx-auto mt-6 text-gray-700">
-        <div className="text-sm">
-          {totalItems === 0
-            ? "0 résultat"
-            : `Affichage ${startIndex + 1} - ${Math.min(startIndex + pageCandidats.length, totalItems)} sur ${totalItems}`}
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage === 1}
-            className="px-3 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 disabled:opacity-50"
-          >
-            «
-          </button>
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 disabled:opacity-50"
-          >
-            ‹
-          </button>
-          <span className="px-3 py-1 bg-white border rounded-lg shadow-sm">
-            Page <b>{currentPage}</b> / {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 disabled:opacity-50"
-          >
-            ›
-          </button>
-          <button
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 disabled:opacity-50"
-          >
-            »
-          </button>
-        </div>
-      </div>
+       {/* Pagination */}
+  <div className="flex justify-between items-center max-w-6xl mx-auto mt-6 text-gray-700">
+    <div className="text-sm">
+      {totalItems === 0
+        ? "0 résultat"
+        : `Affichage ${startIndex + 1} - ${Math.min(startIndex + pageCandidats.length, totalItems)} sur ${totalItems}`}
     </div>
+    <div className="flex gap-2">
+      <button
+        onClick={() => setCurrentPage(1)}
+        disabled={currentPage === 1}
+        className="px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+      >
+        «
+      </button>
+      <button
+        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+        disabled={currentPage === 1}
+        className="px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+      >
+        ‹
+      </button>
+      <span className="px-3 py-1 bg-white border rounded-lg shadow-sm">
+        Page <b>{currentPage}</b> / {totalPages}
+      </span>
+      <button
+        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+        disabled={currentPage === totalPages}
+        className="px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+      >
+        ›
+      </button>
+      <button
+        onClick={() => setCurrentPage(totalPages)}
+        disabled={currentPage === totalPages}
+        className="px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+      >
+        »
+      </button>
+    </div>
+  </div>
+</div>
+    
   );
 };
 

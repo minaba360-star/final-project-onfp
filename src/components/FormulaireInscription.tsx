@@ -149,7 +149,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* NAVBAR */}
-      <header className="bg-orange-500 text-white">
+      <header className="bg-blue-800 text-white">
         <div className="container mx-auto flex items-center justify-between px-4 py-3">
           <a href="/" className="flex items-center space-x-2">
             <img src="logo.png" alt="logo" className="h-10 w-10 rounded-full" />
@@ -157,7 +157,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
           </a>
           <nav className="space-x-4">
             <Link to="/login">
-              <button className="border border-orange-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded">
+              <button className="border border-blue-800 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded">
                 Se connecter
               </button>
             </Link>
@@ -315,19 +315,19 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
       className="hidden"
       required
       onChange={(e) => {
-        handleChange(e);
-        if (e.target.files && e.target.files[0]) {
-          setFormData((prev) => ({
-            ...prev,
-            cvPreview: URL.createObjectURL(e.target.files[0]),
-          }));
-        }
-      }}
+  handleChange(e);
+  if (e.target.files && e.target.files.length > 0) {
+    const file = e.target.files[0];
+    setFormData((prev) => ({
+      ...prev,
+      cvPreview: URL.createObjectURL(file),
+    }));
+  }
+}}
     />
-    <label
+    <label 
       htmlFor="cv"
-      className="block bg-orange-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"
-    >
+      className="block bg-blue-900 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"    >
       📎 Joindre CV
     </label>
 
@@ -358,18 +358,19 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
       className="hidden"
       required
       onChange={(e) => {
-        handleChange(e);
-        if (e.target.files && e.target.files[0]) {
-          setFormData((prev) => ({
-            ...prev,
-            diplomePreview: URL.createObjectURL(e.target.files[0]),
-          }));
-        }
-      }}
+  handleChange(e);
+  if (e.target.files && e.target.files.length > 0) {
+    const file = e.target.files[0];
+    setFormData((prev) => ({
+      ...prev,
+      diplomePreview: URL.createObjectURL(file),
+    }));
+  }
+}}
     />
     <label
       htmlFor="diplome"
-      className="block bg-orange-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"
+      className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"
     >
       🎓 Joindre Diplôme
     </label>
@@ -399,19 +400,20 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
       accept=".pdf,.doc,.docx"
       className="hidden"
       required
-     onChange={(e) => {
+onChange={(e) => {
   handleChange(e);
-  if (e.target.files && e.target.files[0]) {
+  if (e.target.files && e.target.files.length > 0) {
+    const file = e.target.files[0];
     setFormData((prev) => ({
       ...prev,
-      lettrePreview: URL.createObjectURL(e.target.files[0]),
+      lettrePreview: URL.createObjectURL(file),
     }));
   }
 }}
     />
     <label
       htmlFor="lettre"
-      className="block bg-orange-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"
+      className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"
     >
       ✉️ Joindre Lettre
     </label>
@@ -434,14 +436,14 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
 </div>
 
-              {/* Bouton */} <button type="submit" className="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-blue-500 transition"> S'inscrire </button> 
-                              <p className="text-center text-sm text-gray-500 mt-2"> Déjà un compte ?{" "} <Link to="/login" className="text-orange-600 hover:underline"> Se connecter </Link> </p>
+              {/* Bouton */} <button type="submit" className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-blue-500 transition"> S'inscrire </button> 
+                              <p className="text-center text-sm text-gray-500 mt-2"> Déjà un compte ?{" "} <Link to="/login" className="text-blue-900 hover:underline"> Se connecter </Link> </p>
               {/* ... */}
           </form>
         </div>
       </main>
 
-      <footer className="bg-orange-500 h-10 mt-10"></footer>
+      <footer className="bg-blue-900 h-10 mt-10"></footer>
     </div>
   );
 };
