@@ -94,7 +94,7 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* --- HEADER --- */}
-      <header className="bg-blue-800 text-white">
+      <header className="bg-orange-500 text-white">
         <div className="container mx-auto flex items-center justify-between px-4 py-3">
           <a href="/" className="flex items-center space-x-2">
             <img src="logo.png" alt="logo." className="h-10 w-10 rounded-full" />
@@ -156,14 +156,14 @@ const Login: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-orange-500 transition"
+              className="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-500 transition"
             >
               Se connecter
             </button>
 
             <p className="text-center text-sm text-gray-500 mt-3">
               Pas encore de compte ?{" "}
-              <Link to="/" className="text-blue-600 hover:underline">
+              <Link to="/" className="text-orange-600 hover:underline">
                 S'inscrire
               </Link>
             </p>
@@ -171,7 +171,7 @@ const Login: React.FC = () => {
         </div>
       </main>
 
-      <footer className="bg-blue-800 h-10 mt-10"></footer>
+      <footer className="bg-orange-500 h-10 mt-10"></footer>
     </div>
   );
 };
