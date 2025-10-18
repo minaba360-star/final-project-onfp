@@ -21,13 +21,14 @@ const FormulaireInscription: React.FC = () => {
     cv: null as File | null,
     diplome: null as File | null,
     lettre: null as File | null,
-    cvPreview: "",          // 👈 ajout
-  diplomePreview: "",     // 👈 ajout
-  lettrePreview: "",      // 👈 ajout
+    cvPreview: "", // 👈 ajout
+    diplomePreview: "", // 👈 ajout
+    lettrePreview: "", // 👈 ajout
   });
-// Affichage / masquage des mots de passe
-const [showPassword, setShowPassword] = useState<boolean>(false);
-const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  // Affichage / masquage des mots de passe
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
 
   // 🔹 Convertir un fichier en base64
   const fileToBase64 = (file: File): Promise<string> => {
@@ -41,7 +42,9 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
   // ✅ Correction : handleChange qui gère input, select, textarea et file
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { id, value, files } = e.target as HTMLInputElement;
     setFormData((prev) => ({
@@ -95,8 +98,12 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
     try {
       const cv64 = formData.cv ? await fileToBase64(formData.cv) : null;
-      const diplome64 = formData.diplome ? await fileToBase64(formData.diplome) : null;
-      const lettre64 = formData.lettre ? await fileToBase64(formData.lettre) : null;
+      const diplome64 = formData.diplome
+        ? await fileToBase64(formData.diplome)
+        : null;
+      const lettre64 = formData.lettre
+        ? await fileToBase64(formData.lettre)
+        : null;
 
       const newCandidat = {
         id: Date.now(),
@@ -136,7 +143,12 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
       });
 
       // Auto-login et redirection vers le dashboard candidat
-      const userData = { email: formData.email, role: "candidat", prenom: formData.prenom, nom: formData.nom };
+      const userData = {
+        email: formData.email,
+        role: "candidat",
+        prenom: formData.prenom,
+        nom: formData.nom,
+      };
       localStorage.setItem("user", JSON.stringify(userData));
       navigate("/dashboardcandidat", { replace: true });
     } catch (error) {
@@ -151,7 +163,6 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col pt-16">
-
       {/* FORMULAIRE */}
       <main className="flex-grow flex items-center justify-center py-10">
         <div className="bg-white shadow-lg rounded-2xl w-full max-w-4xl p-8">
@@ -164,280 +175,403 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
             className="space-y-6"
             encType="multipart/form-data"
           >
-           
-             {/* Prénom / Nom */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <label htmlFor="prenom" className="block text-sm font-medium">Prénom</label> 
-             <input id="prenom" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> 
-             </div> 
-             <div> <label htmlFor="nom" className="block text-sm font-medium">Nom</label>
-             
-             <input id="nom" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> 
-             </div> 
-             </div> 
-             {/* Date / Lieu de naissance */} 
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div>
-               <label htmlFor="dateNaissance" className="block text-sm font-medium">Date de naissance</label> 
-               <input id="dateNaissance" type="date" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-                </div> <div> <label htmlFor="lieuNaissance" className="block text-sm font-medium">Lieu de naissance</label> 
-                <input id="lieuNaissance" type="text" placeholder="Ville" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-                 </div>
+            {/* Prénom / Nom */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {" "}
+              <div>
+                {" "}
+                <label htmlFor="prenom" className="block text-sm font-medium">
+                  Prénom
+                </label>
+                <input
+                  id="prenom"
+                  type="text"
+                  className="w-full border rounded-lg p-2 mt-1"
+                  required
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                {" "}
+                <label htmlFor="nom" className="block text-sm font-medium">
+                  Nom
+                </label>
+                <input
+                  id="nom"
+                  type="text"
+                  className="w-full border rounded-lg p-2 mt-1"
+                  required
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            {/* Date / Lieu de naissance */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {" "}
+              <div>
+                <label
+                  htmlFor="dateNaissance"
+                  className="block text-sm font-medium"
+                >
+                  Date de naissance
+                </label>
+                <input
+                  id="dateNaissance"
+                  type="date"
+                  className="w-full border rounded-lg p-2 mt-1"
+                  required
+                  onChange={handleChange}
+                />
+              </div>{" "}
+              <div>
+                {" "}
+                <label
+                  htmlFor="lieuNaissance"
+                  className="block text-sm font-medium"
+                >
+                  Lieu de naissance
+                </label>
+                <input
+                  id="lieuNaissance"
+                  type="text"
+                  placeholder="Ville"
+                  className="w-full border rounded-lg p-2 mt-1"
+                  required
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            {/* Email / CIN */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {" "}
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="exemple@mail.com"
+                  className="w-full border rounded-lg p-2 mt-1"
+                  required
+                  onChange={handleChange}
+                />
+              </div>{" "}
+              <div>
+                {" "}
+                <label htmlFor="cin" className="block text-sm font-medium">
+                  CIN
+                </label>{" "}
+                <input
+                  id="cin"
+                  type="text"
+                  className="w-full border rounded-lg p-2 mt-1"
+                  required
+                  onChange={handleChange}
+                />
+              </div>{" "}
+            </div>{" "}
+            {/* Téléphone / Adresse */}{" "}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {" "}
+              <div>
+                {" "}
+                <label htmlFor="tel" className="block text-sm font-medium">
+                  Téléphone
+                </label>
+                <input
+                  id="tel"
+                  type="tel"
+                  placeholder="77 000 00 00"
+                  className="w-full border rounded-lg p-2 mt-1"
+                  required
+                  onChange={handleChange}
+                />
+              </div>{" "}
+              <div>
+                {" "}
+                <label htmlFor="adresse" className="block text-sm font-medium">
+                  Adresse
+                </label>{" "}
+                <input
+                  id="adresse"
+                  type="text"
+                  className="w-full border rounded-lg p-2 mt-1"
+                  required
+                  onChange={handleChange}
+                />
+              </div>{" "}
+            </div>
+            {/* Mot de passe / Confirmation */}
+            {/* Mot de passe / Confirmation */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Champ mot de passe */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium">
+                  Mot de passe (au moins 8 caractères)
+                </label>
+
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="w-full border rounded-lg p-2 mt-1 pr-10"
+                    required
+                    onChange={handleChange}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
+              {/* Champ confirmation */}
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium"
+                >
+                  Confirmer le mot de passe
+                </label>
+
+                <div className="relative">
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="w-full border rounded-lg p-2 mt-1 pr-10"
+                    required
+                    onChange={handleChange}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+            {/* Niveau / Spécialité */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="niveau" className="block text-sm font-medium">
+                  Niveau d’étude
+                </label>
+                <select
+                  id="niveau"
+                  className="w-full border rounded-lg p-2 mt-1"
+                  required
+                  onChange={handleChange}
+                >
+                  <option value="">-- Sélectionnez un niveau --</option>
+                  <option value="Master">Master</option>
+                  <option value="Licence">Licence</option>
+                  <option value="Bac+2">Bac+2</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="specialite"
+                  className="block text-sm font-medium"
+                >
+                  Choisissez votre Spécialité
+                </label>
+                <select
+                  id="specialite"
+                  className="w-full border rounded-lg p-2 mt-1"
+                  required
+                  onChange={handleChange}
+                >
+                  <option value="">-- aucun --</option>
+                  <option value="Développeur Backend">
+                    Développeur Backend
+                  </option>
+                  <option value="Développeur Frontend">
+                    Développeur Frontend
+                  </option>
+                  <option value="Administrateur SRI">Administrateur SRI</option>
+                  <option value="Chef de projet">Chef de projet</option>
+                </select>
+              </div>
+            </div>
+            {/* Expérience */}
+            <div>
+              <label htmlFor="experience" className="block text-sm font-medium">
+                Expérience professionnelle
+              </label>
+              <textarea
+                id="experience"
+                rows={4}
+                placeholder="Décrivez votre expérience professionnelle, stages, projets réalisés..."
+                className="w-full border rounded-lg p-2 mt-1"
+                required
+                onChange={handleChange}
+              />
+            </div>
+            {/* Fichiers */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* === CV === */}
+              <div>
+                <label className="block text-sm font-medium mb-1">CV</label>
+                <input
+                  id="cv"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  required
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (e.target.files && e.target.files.length > 0) {
+                      const file = e.target.files[0];
+                      setFormData((prev) => ({
+                        ...prev,
+                        cvPreview: URL.createObjectURL(file),
+                      }));
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="cv"
+                  className="block bg-blue-900 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"
+                >
+                  📎 Joindre CV
+                </label>
+
+                {/* Affichage du fichier sélectionné */}
+                {formData.cv && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p>📄 {formData.cv.name}</p>
+                    <a
+                      href={formData.cvPreview}
+                      download={formData.cv.name}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Voir / Télécharger
+                    </a>
                   </div>
-                   {/* Email / CIN */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div>
-                       <label htmlFor="email" className="block text-sm font-medium">Email</label>
-                        <input id="email" type="email" placeholder="exemple@mail.com" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-                         </div> <div> <label htmlFor="cin" className="block text-sm font-medium">CIN</label> <input id="cin" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> 
-                         </div> </div> {/* Téléphone / Adresse */} <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <label htmlFor="tel" className="block text-sm font-medium">Téléphone</label>
-                          <input id="tel" type="tel" placeholder="77 000 00 00" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} /> 
-                         </div> <div> <label htmlFor="adresse" className="block text-sm font-medium">Adresse</label> <input id="adresse" type="text" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange} />
-                          </div> </div> 
-                          {/* Mot de passe / Confirmation */}{/* Mot de passe / Confirmation */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {/* Champ mot de passe */}
-  <div>
-    <label
-      htmlFor="password"
-      className="block text-sm font-medium"
-    >
-      Mot de passe (au moins 8 caractères)
-    </label>
+                )}
+              </div>
 
-    <div className="relative">
-      <input
-        id="password"
-        type={showPassword ? "text" : "password"}
-        placeholder="••••••••"
-        className="w-full border rounded-lg p-2 mt-1 pr-10"
-        required
-        onChange={handleChange}
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
-      >
-       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-      </button>
-    </div>
-  </div>
-  {/* Champ confirmation */}
-  <div>
-    <label
-      htmlFor="confirmPassword"
-      className="block text-sm font-medium"
-    >
-      Confirmer le mot de passe
-    </label>
+              {/* === Diplôme === */}
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Diplôme
+                </label>
+                <input
+                  id="diplome"
+                  type="file"
+                  accept=".pdf,.jpg,.png"
+                  className="hidden"
+                  required
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (e.target.files && e.target.files.length > 0) {
+                      const file = e.target.files[0];
+                      setFormData((prev) => ({
+                        ...prev,
+                        diplomePreview: URL.createObjectURL(file),
+                      }));
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="diplome"
+                  className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"
+                >
+                  🎓 Joindre Diplôme
+                </label>
 
-    <div className="relative">
-      <input
-        id="confirmPassword"
-        type={showConfirmPassword ? "text" : "password"}
-        placeholder="••••••••"
-        className="w-full border rounded-lg p-2 mt-1 pr-10"
-        required
-        onChange={handleChange}
-      />
-      <button
-        type="button"
-        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-        className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
-      >
-          {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-      </button>
-    </div>
-  </div>
-</div>
+                {formData.diplome && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p>📑 {formData.diplome.name}</p>
+                    <a
+                      href={formData.diplomePreview}
+                      download={formData.diplome.name}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Voir / Télécharger
+                    </a>
+                  </div>
+                )}
+              </div>
 
-     {/* Niveau / Spécialité */}
-     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  <div>
-    <label htmlFor="niveau" className="block text-sm font-medium">
-      Niveau d’étude
-    </label>
-    <select
-      id="niveau"
-      className="w-full border rounded-lg p-2 mt-1"
-      required
-      onChange={handleChange}
-    >
-      <option value="">-- Sélectionnez un niveau --</option>
-      <option value="Master">Master</option>
-      <option value="Licence">Licence</option>
-      <option value="Bac+2">Bac+2</option>
-    </select>
-  </div>
-    
-  <div>
-    <label htmlFor="specialite" className="block text-sm font-medium">
-      Choisissez votre Spécialité
-    </label>
-    <select
-      id="specialite"
-      className="w-full border rounded-lg p-2 mt-1"
-      required
-      onChange={handleChange} >
-      <option value="">-- aucun --</option>
-      <option value="Développeur Backend">Développeur Backend</option>
-      <option value="Développeur Frontend">Développeur Frontend</option>
-      <option value="Administrateur SRI">Administrateur SRI</option>
-      <option value="Chef de projet">Chef de projet</option>
-    </select>
-  </div>
-</div>
+              {/* === Lettre de motivation === */}
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Lettre de motivation
+                </label>
+                <input
+                  id="lettre"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  required
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (e.target.files && e.target.files.length > 0) {
+                      const file = e.target.files[0];
+                      setFormData((prev) => ({
+                        ...prev,
+                        lettrePreview: URL.createObjectURL(file),
+                      }));
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="lettre"
+                  className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"
+                >
+                  ✉️ Joindre Lettre
+                </label>
 
-                            {/* Expérience */} 
-                            <div>
-                              <label htmlFor="experience" className="block text-sm font-medium">
-                                Expérience professionnelle
-                              </label>
-                              <textarea
-                                id="experience"
-                                rows={4}
-                                placeholder="Décrivez votre expérience professionnelle, stages, projets réalisés..."
-                                className="w-full border rounded-lg p-2 mt-1"
-                                required
-                                onChange={handleChange}
-                              />
-                            </div>
-
-                           {/* Fichiers */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-  {/* === CV === */}
-  <div>
-    <label className="block text-sm font-medium mb-1">CV</label>
-    <input
-      id="cv"
-      type="file"
-      accept=".pdf,.doc,.docx"
-      className="hidden"
-      required
-      onChange={(e) => {
-  handleChange(e);
-  if (e.target.files && e.target.files.length > 0) {
-    const file = e.target.files[0];
-    setFormData((prev) => ({
-      ...prev,
-      cvPreview: URL.createObjectURL(file),
-    }));
-  }
-}}
-    />
-    <label 
-      htmlFor="cv"
-      className="block bg-blue-900 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"    >
-      📎 Joindre CV
-    </label>
-
-    {/* Affichage du fichier sélectionné */}
-    {formData.cv && (
-      <div className="mt-2 text-sm text-gray-600">
-        <p>📄 {formData.cv.name}</p>
-        <a
-          href={formData.cvPreview}
-          download={formData.cv.name}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline"
-        >
-          Voir / Télécharger
-        </a>
-      </div>
-    )}
-  </div>
-
-  {/* === Diplôme === */}
-  <div>
-    <label className="block text-sm font-medium mb-1">Diplôme</label>
-    <input
-      id="diplome"
-      type="file"
-      accept=".pdf,.jpg,.png"
-      className="hidden"
-      required
-      onChange={(e) => {
-  handleChange(e);
-  if (e.target.files && e.target.files.length > 0) {
-    const file = e.target.files[0];
-    setFormData((prev) => ({
-      ...prev,
-      diplomePreview: URL.createObjectURL(file),
-    }));
-  }
-}}
-    />
-    <label
-      htmlFor="diplome"
-      className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"
-    >
-      🎓 Joindre Diplôme
-    </label>
-
-    {formData.diplome && (
-      <div className="mt-2 text-sm text-gray-600">
-        <p>📑 {formData.diplome.name}</p>
-        <a
-          href={formData.diplomePreview}
-          download={formData.diplome.name}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline"
-        >
-          Voir / Télécharger
-        </a>
-      </div>
-    )}
-  </div>
-
-  {/* === Lettre de motivation === */}
-  <div>
-    <label className="block text-sm font-medium mb-1">Lettre de motivation</label>
-    <input
-      id="lettre"
-      type="file"
-      accept=".pdf,.doc,.docx"
-      className="hidden"
-      required
-onChange={(e) => {
-  handleChange(e);
-  if (e.target.files && e.target.files.length > 0) {
-    const file = e.target.files[0];
-    setFormData((prev) => ({
-      ...prev,
-      lettrePreview: URL.createObjectURL(file),
-    }));
-  }
-}}
-    />
-    <label
-      htmlFor="lettre"
-      className="block bg-blue-800 text-white text-center py-2 rounded-lg cursor-pointer hover:bg-blue-500 transition"
-    >
-      ✉️ Joindre Lettre
-    </label>
-
-    {formData.lettre && (
-      <div className="mt-2 text-sm text-gray-600">
-        <p>📝 {formData.lettre.name}</p>
-        <a
-          href={formData.lettrePreview}
-          download={formData.lettre.name}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline"
-        >
-          Voir / Télécharger
-        </a>
-      </div>
-    )}
-  </div>
-
-</div>
-
-              {/* Bouton */} <button type="submit" className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-blue-500 transition"> S'inscrire </button> 
-                              <p className="text-center text-sm text-gray-500 mt-2"> Déjà un compte ?{" "} <Link to="/login" className="text-blue-900 hover:underline"> Se connecter </Link> </p>
-              {/* ... */}
+                {formData.lettre && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p>📝 {formData.lettre.name}</p>
+                    <a
+                      href={formData.lettrePreview}
+                      download={formData.lettre.name}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Voir / Télécharger
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Bouton */}{" "}
+            <button
+              type="submit"
+              className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-blue-500 transition"
+            >
+              {" "}
+              S'inscrire{" "}
+            </button>
+            <p className="text-center text-sm text-gray-500 mt-2">
+              {" "}
+              Déjà un compte ?{" "}
+              <Link to="/login" className="text-blue-900 hover:underline">
+                {" "}
+                Se connecter{" "}
+              </Link>{" "}
+            </p>
+            {/* ... */}
           </form>
         </div>
       </main>
