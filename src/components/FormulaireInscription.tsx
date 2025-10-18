@@ -39,9 +39,9 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
     });
   };
 
-  // ✅ Correction : handleChange qui gère input, select et file
+  // ✅ Correction : handleChange qui gère input, select, textarea et file
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { id, value, files } = e.target as HTMLInputElement;
     setFormData((prev) => ({
@@ -130,12 +130,15 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
       Swal.fire({
         icon: "success",
-        title: "Candidature enregistrée avec succès !",
+        title: "Inscription réussie ! Vous êtes connecté.",
         showConfirmButton: false,
-        timer: 1800,
+        timer: 1500,
       });
 
-      setTimeout(() => navigate("/login"), 1800);
+      // Auto-login et redirection vers le dashboard candidat
+      const userData = { email: formData.email, role: "candidat", prenom: formData.prenom, nom: formData.nom };
+      localStorage.setItem("user", JSON.stringify(userData));
+      navigate("/dashboardcandidat", { replace: true });
     } catch (error) {
       console.error("Erreur :", error);
       Swal.fire({
@@ -147,23 +150,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* NAVBAR */}
-      <header className="bg-blue-800 text-white">
-        <div className="container mx-auto flex items-center justify-between px-4 py-3">
-          <a href="/" className="flex items-center space-x-2">
-            <img src="logo.png" alt="logo" className="h-10 w-10 rounded-full" />
-            <span className="font-bold text-lg">Geustuma</span>
-          </a>
-          <nav className="space-x-4">
-            <Link to="/login">
-              <button className="border border-blue-800 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded">
-                Se connecter
-              </button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-100 flex flex-col pt-16">
 
       {/* FORMULAIRE */}
       <main className="flex-grow flex items-center justify-center py-10">
@@ -229,11 +216,10 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
         onClick={() => setShowPassword(!showPassword)}
         className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
       >
-       {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
       </button>
     </div>
   </div>
-
   {/* Champ confirmation */}
   <div>
     <label
@@ -263,8 +249,8 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   </div>
 </div>
 
-                             {/* Niveau / Spécialité */}
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+     {/* Niveau / Spécialité */}
+     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
   <div>
     <label htmlFor="niveau" className="block text-sm font-medium">
       Niveau d’étude
@@ -281,7 +267,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
       <option value="Bac+2">Bac+2</option>
     </select>
   </div>
-
+    
   <div>
     <label htmlFor="specialite" className="block text-sm font-medium">
       Choisissez votre Spécialité
@@ -296,12 +282,25 @@ const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
       <option value="Développeur Frontend">Développeur Frontend</option>
       <option value="Administrateur SRI">Administrateur SRI</option>
       <option value="Chef de projet">Chef de projet</option>
-
     </select>
   </div>
 </div>
 
                             {/* Expérience */} 
+                            <div>
+                              <label htmlFor="experience" className="block text-sm font-medium">
+                                Expérience professionnelle
+                              </label>
+                              <textarea
+                                id="experience"
+                                rows={4}
+                                placeholder="Décrivez votre expérience professionnelle, stages, projets réalisés..."
+                                className="w-full border rounded-lg p-2 mt-1"
+                                required
+                                onChange={handleChange}
+                              />
+                            </div>
+
                            {/* Fichiers */}
 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
@@ -443,7 +442,7 @@ onChange={(e) => {
         </div>
       </main>
 
-      <footer className="bg-blue-900 h-10 mt-10"></footer>
+      {/* Footer global désormais rendu dans App.tsx */}
     </div>
   );
 };

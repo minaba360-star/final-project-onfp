@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import Navbar from "./Navbar";
 
 interface Candidat {
   id: number;
@@ -121,8 +122,8 @@ const DashboardAdmin: React.FC = () => {
 
   // Statistiques
   const totalCandidats = candidats.length;
-  const totalAcceptes = candidats.filter((c) => c.statut === "accepté").length;
-  const totalRejetes = candidats.filter((c) => c.statut === "rejeté").length;
+  const totalAcceptes = candidats.filter((c) => c.statut === "accepte").length;
+  const totalRejetes = candidats.filter((c) => c.statut === "refuse").length;
 
   // Application du filtre sur la table
 
@@ -154,7 +155,8 @@ const DashboardAdmin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b p-8">
+    <div className="min-h-screen bg-gradient-to-b p-8 pt-24">
+      <Navbar />
       <h1 className="text-4xl font-bold mb-8 text-center bg-gradient-to-r from-blue-800 to-blue-800 bg-clip-text text-transparent drop-shadow-md">
         🧭 Tableau de bord Administrateur
       </h1>
@@ -222,7 +224,7 @@ const DashboardAdmin: React.FC = () => {
         <button
           onClick={() => setFiltre("accepte")}
           className={`px-4 py-2 rounded-lg border font-medium transition ${
-            filtre === "accepté"
+            filtre === "accepte"
               ? "bg-blue-500 text-white"
               : "border-blue-500 text-green-600 hover:bg-green-100"
           }`}
@@ -230,7 +232,7 @@ const DashboardAdmin: React.FC = () => {
           Voir acceptés
         </button>
         <button
-          onClick={() => setFiltre("rejeté")}
+          onClick={() => setFiltre("refuse")}
           className={`px-4 py-2 rounded-lg border font-medium transition ${
             filtre === "refuse"
               ? "bg-blue-600 text-white"
