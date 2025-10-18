@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 interface Candidat {
@@ -11,9 +11,20 @@ interface Candidat {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as { role?: string };
+        if (parsed?.role === "admin" || parsed?.role === "candidat") navigate("/");
+      } catch {/* ignore */}
+    }
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +45,8 @@ const Login: React.FC = () => {
         timer: 1800,
       });
 
-      navigate("/admin");
+      const redirectTo = (location.state as any)?.from?.pathname || "/";
+      navigate(redirectTo, { replace: true });
       return;
     }
 
@@ -70,7 +82,8 @@ const Login: React.FC = () => {
           timer: 2000,
         });
 
-        navigate("/dashboardcandidat");
+        const redirectTo = (location.state as any)?.from?.pathname || "/";
+        navigate(redirectTo, { replace: true });
       } else {
         Swal.fire({
           icon: "error",
@@ -92,17 +105,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* --- HEADER --- */}
-      <header className="bg-blue-800 text-white">
-        <div className="container mx-auto flex items-center justify-between px-4 py-3">
-          <a href="/" className="flex items-center space-x-2">
-            <img src="logo.png" alt="logo." className="h-10 w-10 rounded-full" />
-            <span className="font-bold text-lg">Geustuma</span>
-          </a>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-gray-100 flex flex-col pt-16">
       {/* --- FORMULAIRE --- */}
       <main className="flex-grow flex items-center justify-center py-10">
         <div className="bg-white shadow-lg rounded-2xl w-full max-w-md p-8">
@@ -163,7 +166,7 @@ const Login: React.FC = () => {
 
             <p className="text-center text-sm text-gray-500 mt-3">
               Pas encore de compte ?{" "}
-              <Link to="/" className="text-blue-800 hover:underline">
+              <Link to="/inscription" className="text-blue-800 hover:underline">
                 S'inscrire
               </Link>
             </p>
@@ -173,7 +176,7 @@ const Login: React.FC = () => {
         
       </main>
 
-      <footer className="bg-blue-800 h-10 mt-10"></footer>
+      {/* Footer global désormais rendu dans App.tsx */}
     </div>
   );
 };
