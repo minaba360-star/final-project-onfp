@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
@@ -9,20 +9,29 @@ interface Candidat {
   nom?: string;
 }
 
+interface LocationState {
+  from?: { pathname: string };
+}
+
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation() as { state?: LocationState };
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const API_URL = "http://localhost:3000";
 
-  React.useEffect(() => {
+  useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as { role?: string };
-        if (parsed?.role === "admin" || parsed?.role === "candidat") navigate("/");
-      } catch {/* ignore */}
+        if (parsed?.role === "admin" || parsed?.role === "candidat") {
+          navigate("/");
+        }
+      } catch {
+        /* ignore */
+      }
     }
   }, [navigate]);
 
@@ -30,7 +39,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError("");
 
-    // --- Vérification si c'est un admin ---
+    // --- Vérification admin ---
     const adminEmails = ["minaba360@gmail.com", "alinemangane8@gmail.com"];
     const adminPassword = "admin123";
 
@@ -45,25 +54,20 @@ const Login: React.FC = () => {
         timer: 1800,
       });
 
-      const redirectTo = (location.state as any)?.from?.pathname || "/";
+      const redirectTo = location.state?.from?.pathname || "/";
       navigate(redirectTo, { replace: true });
       return;
     }
 
     try {
-      // --- Requête vers ton serveur local ---
-      const response = await fetch("http://localhost:3000/candidats");
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des candidats.");
-      }
+      const response = await fetch(`${API_URL}/candidats`);
+      if (!response.ok) throw new Error("Erreur lors de la récupération des candidats.");
 
       const candidats: Candidat[] = await response.json();
 
-      // 🔹 Recherche du candidat correspondant
-      const candidat =
-        candidats.find(
-          (c) => c.email === email && c.password === password
-        ) || null;
+      const candidat = candidats.find(
+        (c) => c.email === email && c.password === password
+      );
 
       if (candidat) {
         const userData = {
@@ -77,12 +81,12 @@ const Login: React.FC = () => {
 
         Swal.fire({
           icon: "success",
-          title: `✅ Bienvenue ${candidat.prenom ?? ""} ${candidat.nom ?? ""} !`,
+          title: `✅ Bienvenue ${candidat.prenom ?? ""} ${candidat.nom ?? ""}!`,
           showConfirmButton: false,
           timer: 2000,
         });
 
-        const redirectTo = (location.state as any)?.from?.pathname || "/";
+        const redirectTo = location.state?.from?.pathname || "/";
         navigate(redirectTo, { replace: true });
       } else {
         Swal.fire({
@@ -93,7 +97,7 @@ const Login: React.FC = () => {
         });
         setError("Email ou mot de passe incorrect !");
       }
-    } catch (err: unknown) {
+    } catch (err) {
       console.error("Erreur de connexion :", err);
       Swal.fire({
         icon: "warning",
@@ -106,7 +110,6 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col pt-16">
-      {/* --- FORMULAIRE --- */}
       <main className="flex-grow flex items-center justify-center py-10">
         <div className="bg-white shadow-lg rounded-2xl w-full max-w-md p-8">
           <h2 className="text-2xl font-semibold text-center mb-6 text-gray-700">
@@ -172,11 +175,7 @@ const Login: React.FC = () => {
             </p>
           </form>
         </div>
-
-        
       </main>
-
-      {/* Footer global désormais rendu dans App.tsx */}
     </div>
   );
 };

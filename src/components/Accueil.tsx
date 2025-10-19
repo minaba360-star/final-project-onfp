@@ -1,8 +1,8 @@
 import { useState } from "react"; 
 import Hero from "./Hero";
 
-import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import { useNavigate, type NavigateFunction } from "react-router-dom";
+//import Swal from "sweetalert2";
 
 interface Offer {
   id: number;
@@ -188,6 +188,11 @@ function Accueil() {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function handleApply(_selectedOffer: Offer, _navigate: NavigateFunction): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <div className="pt-16">
       {/* Hero / Carousel */}
@@ -433,31 +438,31 @@ function Accueil() {
 export default Accueil;
 
 // Helpers dans le même fichier pour garder la lisibilité
-function handleApply(offer: Offer | null, navigate: any) {
-  if (!offer) return;
-  const stored = localStorage.getItem("user");
-  const parsed = stored ? (JSON.parse(stored) as { role?: string }) : null;
+// function handleApply(offer: Offer | null, navigate: unknown) {
+//   if (!offer) return;
+//   const stored = localStorage.getItem("user");
+//   const parsed = stored ? (JSON.parse(stored) as { role?: string }) : null;
 
-  if (parsed?.role === "candidat") {
-    // Déjà connecté en tant que candidat → aller au dashboard
-    navigate("/dashboardcandidat");
-    return;
-  }
+//   if (parsed?.role === "candidat") {
+//     // Déjà connecté en tant que candidat → aller au dashboard
+//     navigate("/dashboardcandidat");
+//     return;
+//   }
 
-  // Demander si l'utilisateur a un compte
-  Swal.fire({
-    title: "Avez-vous déjà un compte ?",
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Oui, se connecter",
-    cancelButtonText: "Non, s'inscrire",
-    confirmButtonColor: "#1e3a8a",
-    cancelButtonColor: "#2563eb",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      navigate("/login");
-    } else {
-      navigate("/inscription");
-    }
-  });
-}
+//   // Demander si l'utilisateur a un compte
+//   Swal.fire({
+//     title: "Avez-vous déjà un compte ?",
+//     icon: "question",
+//     showCancelButton: true,
+//     confirmButtonText: "Oui, se connecter",
+//     cancelButtonText: "Non, s'inscrire",
+//     confirmButtonColor: "#1e3a8a",
+//     cancelButtonColor: "#2563eb",
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       navigate("/login");
+//     } else {
+//       navigate("/inscription");
+//     }
+//   });
+//}

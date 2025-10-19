@@ -406,19 +406,8 @@ const FormulaireInscription: React.FC = () => {
               </div>
             </div>
             {/* Expérience */}
-            <div>
-              <label htmlFor="experience" className="block text-sm font-medium">
-                Expérience professionnelle
-              </label>
-              <textarea
-                id="experience"
-                rows={4}
-                placeholder="Décrivez votre expérience professionnelle, stages, projets réalisés..."
-                className="w-full border rounded-lg p-2 mt-1"
-                required
-                onChange={handleChange}
-              />
-            </div>
+            <div> <label htmlFor="experience" className="block text-sm font-medium">Années d’expérience</label>
+                             <input id="experience" type="number" placeholder="Nombre d'années" className="w-full border rounded-lg p-2 mt-1" required onChange={handleChange}/></div>
             {/* Fichiers */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* === CV === */}

@@ -6,7 +6,7 @@ import DashboardCandidat from "./components/DashboardCandidat";
 import DashboardAdmin from "./components/DashboardAdmin";
 import Accueil from "./components/Accueil";
 import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
+//import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
 
 const App: React.FC = () => {
@@ -14,33 +14,20 @@ const App: React.FC = () => {
     <Router>
       <Navbar />
       <Routes>
-        
-        {/* Page de connexion */}
-        <Route path="/login" element={<Login />} />
-        
         {/* Page d'accueil par défaut */}
         <Route path="/" element={<Accueil />} />
 
+        {/* Page de connexion */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Page de connexion */}
+        {/* <Route path="/logout" element={<Login />} /> */}
 
         {/* Dashboard du candidat */}
-        <Route
-          path="/dashboardcandidat"
-          element={
-            <ProtectedRoute requiredRole="candidat">
-              <DashboardCandidat />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/dashboardcandidat" element={<DashboardCandidat />} />
 
         {/* Dashboard de l’admin */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <DashboardAdmin />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/admin" element={<DashboardAdmin />} />
 
         {/* Page d'inscription */}
         <Route path="/inscription" element={<FormulaireInscription />} />
