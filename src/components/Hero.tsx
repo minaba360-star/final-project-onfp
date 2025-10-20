@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 const slides = [
   { src: "/equipe.jpeg" },
   { src: "/bureau.jpeg" },
-  { src: "/JobSpace.png" },
   { src: "/men.jpg" },
   { src: "/negoce.jpeg" },
   { src: "/tes rêves.jpeg" }
@@ -49,11 +48,11 @@ export default function Hero() {
         {/* Boutons précédent / suivant */}
         <button
           onClick={() => setCurrent(current === 0 ? slides.length - 1 : current - 1)}
-          className="absolute top-1/2 left-2 sm:left-4 -translate-y-1/2 bg-blue-950 text-white p-2 sm:p-3 rounded-full hover:bg-gray-600 z-10"
+          className="absolute top-1/2 left-2 sm:left-4 -translate-y-1/2 bg-blue-600 text-white p-2 sm:p-3 rounded-full hover:bg-gray-600 z-10"
         >‹</button>
         <button
           onClick={() => setCurrent(current === slides.length - 1 ? 0 : current + 1)}
-          className="absolute top-1/2 right-2 sm:right-4 -translate-y-1/2 bg-blue-950 text-white p-2 sm:p-3 rounded-full hover:bg-gray-600 z-10"
+          className="absolute top-1/2 right-2 sm:right-4 -translate-y-1/2 bg-blue-600 text-white p-2 sm:p-3 rounded-full hover:bg-gray-600 z-10"
         >›</button>
 
         {/* Indicateurs */}
@@ -62,7 +61,7 @@ export default function Hero() {
             <button
               key={index}
               onClick={() => setCurrent(index)}
-              className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${index === current ? "bg-blue-950" : "bg-gray-400"}`}
+              className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${index === current ? "bg-blue-600" : "bg-gray-400"}`}
             ></button>
           ))}
         </div>

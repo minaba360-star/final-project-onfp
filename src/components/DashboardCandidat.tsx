@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
 
 interface Candidat {
   id: number;
@@ -28,7 +27,7 @@ const DashboardCandidat: React.FC = () => {
   const [candidat, setCandidat] = useState<Candidat | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Récupération automatique du candidat connecté
+  // 🔹 Récupération auto du candidat connecté
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -60,12 +59,8 @@ const DashboardCandidat: React.FC = () => {
       }
     };
 
-    // Première récupération
     fetchCandidatData();
-
-    // 🔁 Actualisation automatique toutes les 5 secondes
     const interval = setInterval(fetchCandidatData, 5000);
-
     return () => clearInterval(interval);
   }, [navigate]);
 
@@ -75,13 +70,12 @@ const DashboardCandidat: React.FC = () => {
     navigate("/login");
   };
 
-  // 🔹 Télécharger un fichier
+  // 🔹 Téléchargement fichier
   const handleDownload = (url: string | null | undefined, filename: string) => {
     if (!url) {
       alert("Aucun fichier disponible !");
       return;
     }
-
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
@@ -105,42 +99,72 @@ const DashboardCandidat: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 pt-24">
-      <Navbar />
+    <div className=" bg-gray-100 mb-10">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-center text-blue-800">
-          Tableau de bord Candidat
-        </h1>
-        <button
+    <div className="bg-gradient-to-b mb-10">
+
+      <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-blue-800 to-blue-800 bg-clip-text text-transparent drop-shadow-md">
+        🧭 Tableau de bord Candidat
+      </h1>
+        {/* <button
           onClick={handleLogout}
-          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+          className="bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700 transition"
         >
           Déconnexion
-        </button>
+        </button> */}
       </div>
 
-      {/* Carte infos */}
-      <div className="bg-white p-6 rounded-2xl shadow-md max-w-3xl mx-auto">
-        <h2 className="text-2xl font-semibold mb-4 text-center">
+      {/* Carte avec tableau */}
+      <div className="bg-white p-6 rounded-2xl shadow-md max-w-4xl mx-auto">
+        <h2 className="text-2xl font-semibold mb-6 text-center">
           Bonjour,{" "}
           <span className="text-blue-700">
             {candidat.prenom} {candidat.nom}
           </span>
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-          <p><strong>Email :</strong> {candidat.email}</p>
-          <p><strong>CIN :</strong> {candidat.cin}</p>
-          <p><strong>Téléphone :</strong> {candidat.tel}</p>
-          <p><strong>Adresse :</strong> {candidat.adresse}</p>
-          <p><strong>Date de naissance :</strong> {candidat.dateNaissance}</p>
-          <p><strong>Lieu de naissance :</strong> {candidat.lieuNaissance}</p>
-          <p><strong>Niveau :</strong> {candidat.niveau}</p>
-          <p><strong>Spécialité :</strong> {candidat.specialite}</p>
-          <p><strong>Expérience :</strong> {candidat.experience} an(s)</p>
-        </div>
+        <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
+          <tbody>
+            <tr className="bg-gray-100">
+              <td className="border border-gray-300 px-4 py-2 font-medium">Email</td>
+              <td className="border border-gray-300 px-4 py-2">{candidat.email}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-4 py-2 font-medium">CIN</td>
+              <td className="border border-gray-300 px-4 py-2">{candidat.cin}</td>
+            </tr>
+            <tr className="bg-gray-100">
+              <td className="border border-gray-300 px-4 py-2 font-medium">Téléphone</td>
+              <td className="border border-gray-300 px-4 py-2">{candidat.tel}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-4 py-2 font-medium">Adresse</td>
+              <td className="border border-gray-300 px-4 py-2">{candidat.adresse}</td>
+            </tr>
+            <tr className="bg-gray-100">
+              <td className="border border-gray-300 px-4 py-2 font-medium">Date de naissance</td>
+              <td className="border border-gray-300 px-4 py-2">{candidat.dateNaissance}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-4 py-2 font-medium">Lieu de naissance</td>
+              <td className="border border-gray-300 px-4 py-2">{candidat.lieuNaissance}</td>
+            </tr>
+            <tr className="bg-gray-100">
+              <td className="border border-gray-300 px-4 py-2 font-medium">Niveau</td>
+              <td className="border border-gray-300 px-4 py-2">{candidat.niveau}</td>
+            </tr>
+            <tr>
+              <td className="border border-gray-300 px-4 py-2 font-medium">Spécialité</td>
+              <td className="border border-gray-300 px-4 py-2">{candidat.specialite}</td>
+            </tr>
+            <tr className="bg-gray-100">
+              <td className="border border-gray-300 px-4 py-2 font-medium">Expérience</td>
+              <td className="border border-gray-300 px-4 py-2">{candidat.experience} an(s)</td>
+            </tr>
+          </tbody>
+        </table>
 
+        {/* Statut candidature */}
         <div className="mt-6 text-center">
           <p className="font-semibold">
             Statut de candidature :
@@ -158,41 +182,33 @@ const DashboardCandidat: React.FC = () => {
           </p>
         </div>
 
-        {/* 🔹 Téléchargement des fichiers */}
+        {/* 🔹 Téléchargement fichiers */}
         {candidat.fichiers && (
           <div className="mt-8">
-            <h3 className="font-semibold text-lg mb-2 text-gray-800">
-              Mes documents :
-            </h3>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <h3 className="font-semibold text-lg mb-2 text-gray-800">Mes documents :</h3>
+            <div className="flex flex-wrap gap-3 justify-center">
               {candidat.fichiers.cv && (
                 <button
-                  onClick={() =>
-                    handleDownload(candidat.fichiers?.cv, "CV.pdf")
-                  }
+                  onClick={() => handleDownload(candidat.fichiers?.cv, "CV.pdf")}
                   className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition"
                 >
-                  📄 Télécharger CV
+                  📄 CV
                 </button>
               )}
               {candidat.fichiers.diplome && (
                 <button
-                  onClick={() =>
-                    handleDownload(candidat.fichiers?.diplome, "Diplome.pdf")
-                  }
+                  onClick={() => handleDownload(candidat.fichiers?.diplome, "Diplome.pdf")}
                   className="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition"
                 >
-                  🎓 Télécharger Diplôme
+                  🎓 Diplôme
                 </button>
               )}
               {candidat.fichiers.lettre && (
                 <button
-                  onClick={() =>
-                    handleDownload(candidat.fichiers?.lettre, "Lettre.pdf")
-                  }
+                  onClick={() => handleDownload(candidat.fichiers?.lettre, "Lettre.pdf")}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                 >
-                  ✉️ Télécharger Lettre
+                  ✉️ Lettre
                 </button>
               )}
             </div>

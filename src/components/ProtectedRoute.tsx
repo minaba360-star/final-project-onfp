@@ -3,7 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: JSX.Element;
-  requiredRole?: "admin" | "candidat";
+  requiredRole?: "admin" | "candidat" | "recruteur";
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
@@ -13,7 +13,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const location = useLocation();
   const [user, setUser] = useState<{ role: string } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [accessDenied, setAccessDenied] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -28,20 +27,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         setUser(null);
       } else {
         setUser({ role: parsed.role });
-        if (requiredRole && parsed.role !== requiredRole) {
-          setAccessDenied(true);
-        }
       }
     } catch {
       setUser(null);
     } finally {
       setLoading(false);
     }
-  }, [requiredRole]);
+  }, []);
 
   if (loading) return <p className="text-center mt-4">Chargement...</p>;
 
-  if (!user || accessDenied) {
+  if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
+
+  if (requiredRole && user.role !== requiredRole) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
@@ -49,4 +47,3 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 };
 
 export default ProtectedRoute;
-

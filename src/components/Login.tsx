@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-interface Candidat {
+interface User {
   email: string;
   password: string;
   prenom?: string;
   nom?: string;
+  role?: "admin" | "candidat" | "recruteur";
 }
 
 const Login: React.FC = () => {
@@ -16,13 +17,18 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  React.useEffect(() => {
+  // --- Si l'utilisateur est déjà connecté, rediriger selon rôle ---
+  useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { role?: string };
-        if (parsed?.role === "admin" || parsed?.role === "candidat") navigate("/");
-      } catch {/* ignore */}
+        const parsed = JSON.parse(stored) as User;
+        if (parsed.role === "admin") navigate("/dashboard/admin");
+        else if (parsed.role === "candidat") navigate("/dashboard/candidat");
+        else if (parsed.role === "recruteur") navigate("recruteur");
+      } catch {
+        localStorage.removeItem("user");
+      }
     }
   }, [navigate]);
 
@@ -30,12 +36,11 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError("");
 
-    // --- Vérification si c'est un admin ---
+    // --- Vérification admin statique ---
     const adminEmails = ["minaba360@gmail.com", "alinemangane8@gmail.com"];
     const adminPassword = "admin123";
-
     if (adminEmails.includes(email) && password === adminPassword) {
-      const adminUser = { email, role: "admin" };
+      const adminUser: User = { email, role: "admin" };
       localStorage.setItem("user", JSON.stringify(adminUser));
 
       Swal.fire({
@@ -45,45 +50,37 @@ const Login: React.FC = () => {
         timer: 1800,
       });
 
-      const redirectTo = (location.state as any)?.from?.pathname || "/";
-      navigate(redirectTo, { replace: true });
+      navigate("/dashboard/admin", { replace: true });
       return;
     }
 
     try {
-      // --- Requête vers ton serveur local ---
+      // --- Requête vers ton serveur JSON ---
       const response = await fetch("http://localhost:3000/candidats");
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des candidats.");
-      }
+      if (!response.ok) throw new Error("Erreur serveur");
 
-      const candidats: Candidat[] = await response.json();
+      const candidats: User[] = await response.json();
 
-      // 🔹 Recherche du candidat correspondant
-      const candidat =
-        candidats.find(
-          (c) => c.email === email && c.password === password
-        ) || null;
+      const user = candidats.find(
+        (c) => c.email === email && c.password === password
+      ) || null;
 
-      if (candidat) {
-        const userData = {
-          email: candidat.email,
-          role: "candidat",
-          prenom: candidat.prenom,
-          nom: candidat.nom,
-        };
-
+      if (user) {
+        // Déterminer le rôle : candidat ou recruteur
+        const role = user.role ?? "candidat"; // par défaut candidat
+        const userData: User = { ...user, role };
         localStorage.setItem("user", JSON.stringify(userData));
 
         Swal.fire({
           icon: "success",
-          title: `✅ Bienvenue ${candidat.prenom ?? ""} ${candidat.nom ?? ""} !`,
+          title: `✅ Bienvenue ${user.prenom ?? ""} ${user.nom ?? ""} !`,
           showConfirmButton: false,
           timer: 2000,
         });
 
-        const redirectTo = (location.state as any)?.from?.pathname || "/";
-        navigate(redirectTo, { replace: true });
+        // Redirection selon rôle
+        if (role === "candidat") navigate("/dashboard/candidat", { replace: true });
+        else if (role === "recruteur") navigate("recruteur", { replace: true });
       } else {
         Swal.fire({
           icon: "error",
@@ -93,8 +90,8 @@ const Login: React.FC = () => {
         });
         setError("Email ou mot de passe incorrect !");
       }
-    } catch (err: unknown) {
-      console.error("Erreur de connexion :", err);
+    } catch (err) {
+      console.error(err);
       Swal.fire({
         icon: "warning",
         title: "⚠️ Impossible de se connecter au serveur local.",
@@ -106,7 +103,6 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col pt-16">
-      {/* --- FORMULAIRE --- */}
       <main className="flex-grow flex items-center justify-center py-10">
         <div className="bg-white shadow-lg rounded-2xl w-full max-w-md p-8">
           <h2 className="text-2xl font-semibold text-center mb-6 text-gray-700">
@@ -172,11 +168,7 @@ const Login: React.FC = () => {
             </p>
           </form>
         </div>
-
-        
       </main>
-
-      {/* Footer global désormais rendu dans App.tsx */}
     </div>
   );
 };

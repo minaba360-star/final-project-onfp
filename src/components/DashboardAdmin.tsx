@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import Navbar from "./Navbar";
 
 interface Candidat {
   id: number;
@@ -156,7 +155,7 @@ const DashboardAdmin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b p-8 pt-24">
-      <Navbar />
+
       <h1 className="text-4xl font-bold mb-8 text-center bg-gradient-to-r from-blue-800 to-blue-800 bg-clip-text text-transparent drop-shadow-md">
         🧭 Tableau de bord Administrateur
       </h1>
@@ -245,7 +244,7 @@ const DashboardAdmin: React.FC = () => {
           onClick={() => setFiltre("tous")}
           className={`px-4 py-2 rounded-lg border font-medium transition ${
             filtre === "tous"
-              ? "bg-blue-500 text-black"
+              ? "bg-blue-500 text-white"
               : "border-blue-500 text-blue-900 hover:bg-orange-100"
           }`}
         >
@@ -292,7 +291,7 @@ const DashboardAdmin: React.FC = () => {
       {/* Tableau principal */}
       <div className="overflow-x-auto bg-white/90 rounded-2xl shadow-md backdrop-blur-sm max-w-6xl mx-auto border border-orange-800">
         <table className="w-full">
-          <thead className="bg-blue-900 text-white text-sm uppercase tracking-wider border-b border-blue-650">
+          <thead className="bg-blue-600 to-indigo-600 text-white text-sm uppercase tracking-wider border-b border-blue-650">
             <tr>
               {["Nom", "Prénom", "Email", "Spécialité", "Niveau", "Statut", "Documents", "Action"].map((h) => (
                 <th key={h} className="p-3 text-left font-semibold border-b border-blue-300">
@@ -344,9 +343,9 @@ const DashboardAdmin: React.FC = () => {
                     <td className="p-3 text-center border-b">
                       <button
                         onClick={() => handleDownloadPDF(c)}
-                        className="bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-orange-300 transition"
+                        className="bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-blue-500 transition"
                       >
-                        📁 Voir fichiers
+                        Voir fichiers
                       </button>
                     </td>
                     <td className="p-3 text-center border-b">
