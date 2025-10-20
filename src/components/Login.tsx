@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-interface Candidat {
+interface User {
   email: string;
   password: string;
   prenom?: string;
   nom?: string;
+  role?: "admin" | "candidat" | "recruteur";
 }
 
 interface LocationState {
@@ -21,17 +22,13 @@ const Login: React.FC = () => {
   const [error, setError] = useState("");
   const API_URL = "http://localhost:3000";
 
-  useEffect(() => {
+  React.useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as { role?: string };
-        if (parsed?.role === "admin" || parsed?.role === "candidat") {
-          navigate("/");
-        }
-      } catch {
-        /* ignore */
-      }
+        if (parsed?.role === "admin" || parsed?.role === "candidat") navigate("/");
+      } catch {/* ignore */}
     }
   }, [navigate]);
 
@@ -39,12 +36,14 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError("");
 
-    // --- Vérification admin ---
+    // --- Vérification si c'est un admin ---
     const adminEmails = ["minaba360@gmail.com", "alinemangane8@gmail.com"];
     const adminPassword = "admin123";
-
     if (adminEmails.includes(email) && password === adminPassword) {
-      const adminUser = { email, role: "admin" };
+      const adminUser: User = {
+        email, role: "admin",
+        password: ""
+      };
       localStorage.setItem("user", JSON.stringify(adminUser));
 
       Swal.fire({
@@ -54,39 +53,40 @@ const Login: React.FC = () => {
         timer: 1800,
       });
 
-      const redirectTo = location.state?.from?.pathname || "/";
+      const redirectTo = (location.state as unknown)?.from?.pathname || "/";
       navigate(redirectTo, { replace: true });
       return;
     }
 
     try {
+      // --- Requête vers ton serveur local ---
       const response = await fetch(`${API_URL}/candidats`);
-      if (!response.ok) throw new Error("Erreur lors de la récupération des candidats.");
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des candidats.");
+      }
 
-      const candidats: Candidat[] = await response.json();
+      const candidats: User[] = await response.json();
 
-      const candidat = candidats.find(
-        (c) => c.email === email && c.password === password
-      );
+      // 🔹 Recherche du candidat correspondant
+      const candidat =
+        candidats.find(
+          (c) => c.email === email && c.password === password
+        ) || null;
 
-      if (candidat) {
-        const userData = {
-          email: candidat.email,
-          role: "candidat",
-          prenom: candidat.prenom,
-          nom: candidat.nom,
-        };
-
+      if (candidat) { // ✅ correction ici : "user" → "candidat"
+        // Déterminer le rôle : candidat ou recruteur
+        const role = candidat.role ?? "candidat"; // par défaut candidat
+        const userData: User = { ...candidat, role };
         localStorage.setItem("user", JSON.stringify(userData));
 
         Swal.fire({
           icon: "success",
-          title: `✅ Bienvenue ${candidat.prenom ?? ""} ${candidat.nom ?? ""}!`,
+          title: `✅ Bienvenue ${candidat.prenom ?? ""} ${candidat.nom ?? ""} !`,
           showConfirmButton: false,
           timer: 2000,
         });
 
-        const redirectTo = location.state?.from?.pathname || "/";
+        const redirectTo = (location.state as unknown)?.from?.pathname || "/";
         navigate(redirectTo, { replace: true });
       } else {
         Swal.fire({
@@ -97,7 +97,7 @@ const Login: React.FC = () => {
         });
         setError("Email ou mot de passe incorrect !");
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Erreur de connexion :", err);
       Swal.fire({
         icon: "warning",

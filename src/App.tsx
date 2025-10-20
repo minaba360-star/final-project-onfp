@@ -1,46 +1,70 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import FormulaireInscription from "./components/FormulaireInscription";
 import Login from "./components/Login";
 import DashboardCandidat from "./components/DashboardCandidat";
 import DashboardAdmin from "./components/DashboardAdmin";
+import Recruteur from "./components/Recruteur"; // formulaire recruteur (dashboard)
 import Accueil from "./components/Accueil";
+import DetailOffre from "./components/DetailOffre";
 import Navbar from "./components/Navbar";
-//import ProtectedRoute from "./components/ProtectedRoute";
+// import ProtectedRoute from "./components/ProtectedRoute"; // ✅ décommenté
 import Footer from "./components/Footer";
+
+// Layout principal : gère Navbar/Footer selon la page
+const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
+
+  // ✅ On cache Navbar & Footer pour toutes les routes dashboard
+  const hideNavbarFooter = location.pathname.startsWith("/dashboard") || location.pathname === "/admin";
+
+  return (
+    <>
+      {!hideNavbarFooter && <Navbar />}
+      {children}
+      {!hideNavbarFooter && <Footer />}
+    </>
+  );
+};
 
 const App: React.FC = () => {
   return (
     <Router>
-      <Navbar />
-      <Routes>
-        {/* Page d'accueil par défaut */}
-        <Route path="/" element={<Accueil />} />
+      <Layout>
+        <Routes>
+          {/* Page d'accueil */}
+          <Route path="/" element={<Accueil />} />
 
-        {/* Page de connexion */}
-        <Route path="/login" element={<Login />} />
+          {/* Auth */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/inscription" element={<FormulaireInscription />} />
 
-        {/* Page de connexion */}
-        {/* <Route path="/logout" element={<Login />} /> */}
+          {/* Recruteur */}
+          <Route path="/recruteur" element={<Recruteur />} />
 
-        {/* Dashboard du candidat */}
-        <Route path="/dashboardcandidat" element={<DashboardCandidat />} />
+          {/* Dashboard candidat */}
+          <Route
+            path="/dashboardcandidat"
+            element={
+                <DashboardCandidat />
+            }
+          />
 
-        {/* Dashboard de l’admin */}
-        <Route path="/admin" element={<DashboardAdmin />} />
+          {/* Dashboard admin */}
+          <Route
+            path="/admin"
+            element={
+                <DashboardAdmin />
+            }
+          />
 
-        {/* Page d'inscription */}
-        <Route path="/inscription" element={<FormulaireInscription />} />
+          {/* Détail offre */}
+          <Route path="/offre/:id" element={<DetailOffre />} />
 
-        {/* Page 404 */}
-        <Route path="*" element={<div>Page non trouvée</div>} />
-
-        {/* Page d'accueil */}
-        <Route path="/accueil" element={<Accueil />} />
-
-        {/* La Navbar est rendue globalement au-dessus des routes */}
-      </Routes>
-      <Footer />
+          {/* 404 */}
+          <Route path="*" element={<div className="p-10 text-center">Page non trouvée ❌</div>} />
+        </Routes>
+      </Layout>
     </Router>
   );
 };

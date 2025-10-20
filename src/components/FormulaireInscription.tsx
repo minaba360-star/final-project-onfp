@@ -166,7 +166,7 @@ const FormulaireInscription: React.FC = () => {
       {/* FORMULAIRE */}
       <main className="flex-grow flex items-center justify-center py-10">
         <div className="bg-white shadow-lg rounded-2xl w-full max-w-4xl p-8">
-          <h2 className="text-2xl font-semibold text-center mb-6">
+          <h2 className="text-blue-600 to-indigo-600 text-2xl font-semibold text-center mb-6">
             Formulaire d’inscription de candidature
           </h2>
 

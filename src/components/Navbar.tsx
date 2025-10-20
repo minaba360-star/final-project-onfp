@@ -31,7 +31,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-blue-950 fixed w-full z-50">
+    <nav className="bg-gradient-to-r from-blue-600 to-indigo-600 fixed w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo à gauche */}
@@ -43,6 +43,10 @@ const Navbar = () => {
 
           {/* Liens à droite sur desktop */}
           <div className="hidden md:flex ml-auto space-x-4">
+            <button onClick={() => goToSection("hero")} className="text-white hover:bg-white hover:text-blue-500 px-3 py-2 rounded-md text-sm font-medium border-2 font-serif">Accueil</button>
+            <button onClick={() => goToSection("Recruteur")} className="text-white hover:bg-white hover:text-blue-500 px-3 py-2 rounded-md text-sm font-medium border-2 font-serif">Recruteur</button>
+            <button onClick={() => navigate("/login")} className="text-white hover:bg-white hover:text-blue-500 px-3 py-2 rounded-md text-sm font-medium border-2 font-serif">Se connecter</button>
+            <Link to="/inscription" className="text-blue-500 to-indigo-600 hover:bg-white hover:text-white px-3 py-2 rounded-md text-sm font-bold border-2 bg-white font-serif">S'inscrire</Link>
             <button
               onClick={() => goToSection("hero")}
               className="text-white hover:bg-white hover:text-blue-950 px-3 py-2 rounded-md text-sm font-medium border-2 font-serif"
@@ -90,6 +94,9 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden bg-gray-800">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <button onClick={() => goToSection("hero")} className="block w-full text-left text-gray-300 hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-base font-medium">Accueil</button>
+            <button onClick={() => goToSection("Recruteur")} className="block w-full text-left text-gray-300 hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-base font-medium">Recruteur</button>
+            <button onClick={() => { setIsOpen(false); navigate("/login"); }} className="block w-full text-left text-gray-300 hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-base font-medium">Se connecter</button>
             <button
               onClick={() => goToSection("hero")}
               className="block w-full text-left text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium"
